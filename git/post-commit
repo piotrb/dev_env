@@ -1,0 +1,121 @@
+#!/usr/bin/env ruby
+
+# modified (and coverted to ruby) from:
+# https://github.com/Spaceman-Labs/asana-post-commit
+
+# -----------------------
+# necessary configuration:
+# git config --global user.asana-key "MY_ASANA_API_KEY" (http://app.asana.com/-/account_api)
+# -----------------------
+
+require 'net/http'
+
+class Asana
+  def initialize(apikey)
+    @apikey = apikey
+  end
+  def comment(ticketid, message)
+    puts "Updating Asana ticket: #{ticketid}"
+    request :post, "https://app.asana.com/api/1.0/tasks/#{ticketid}/stories", 'text' => message
+  end
+  def close(ticketid)
+    puts "Closing Asana ticket: #{ticketid}"
+    request :put, "https://app.asana.com/api/1.0/tasks/#{ticketid}", 'completed' => 'true'
+  end
+  private
+  def request(method, url, data)
+    uri = URI(url)
+    req = case method
+            when :post then Net::HTTP::Post.new(uri.request_uri)
+            when :put then Net::HTTP::Put.new(uri.request_uri)
+            else
+              raise "don't know how to process type: #{method}"
+            end
+    req.set_form_data(data)
+    req.basic_auth @apikey, ''
+    http = Net::HTTP.new(uri.hostname, uri.port)
+    http.use_ssl = true
+    #http.set_debug_output($stdout)
+    res = http.request(req)
+    case res
+    when Net::HTTPSuccess, Net::HTTPRedirection
+      # OK
+    else
+      raise res.inspect
+    end
+  end
+end
+
+class GitInfo
+  def self.apikey
+    `git config user.asana-key`.strip
+  end
+  def self.revision
+    `git log --pretty=format:"%h" -n1`.strip
+  end
+  def self.subject
+    `git log --pretty=format:"%s" -n1`.strip
+  end
+  def self.body
+    `git log --pretty=format:"%b" -n1`.strip
+  end
+  def self.branch
+    `git rev-parse --abbrev-ref HEAD`.strip
+  end
+end
+
+apikey = GitInfo.apikey
+exit 0 if apikey.empty?
+
+asana = Asana.new(apikey)
+
+closed = []
+referenced = []
+
+closes = false
+
+taskid_pattern = /#([0-9]*)/
+closes_pattern = /([Ff]ix|[Cc]lose|[Cc]losing)/
+and_pattern = /([Aa]nd|&)/
+
+repo = File.basename(Dir.getwd)
+subject = GitInfo.subject
+body = GitInfo.body
+revision = GitInfo.revision
+
+branch_name = GitInfo.branch
+if branch_name =~ /-(\d+)$/
+  ticketid = $~[1]
+  if ticketid.length > 6
+    puts "Detected ticket id: #{ticketid} in branch name"
+    referenced << ticketid
+  end
+end
+
+"#{subject} #{body}".split(/\s+/).each do |word|
+  if word =~ taskid_pattern
+    # if we have a task id, save it to the appropriate array
+    ticketid = $~[1]
+    if closes
+      closed << ticketid
+    end
+    referenced << ticketid
+  elsif word =~ closes_pattern
+    # or else if we have a "closes" word, set the tracking bool accordingly
+    closes = true
+  elsif !(word =~ and_pattern)
+    # and if we don't, set us back to referencing
+    # (if we're an "and", don't change any state)
+    closes = false
+  end
+end
+
+referenced.uniq.each do |ticketid|
+  message = "commited: #{revision}\n#{subject}\n\n#{body}"
+  asana.comment(ticketid, message)
+end
+
+closed.uniq.each do |ticketid|
+  asana.close(ticketid)
+end
+
