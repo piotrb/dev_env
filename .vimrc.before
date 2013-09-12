@@ -21,3 +21,16 @@ let g:HammerQuiet = 1
 let g:Tlist_Ctags_Cmd = "/usr/local/bin/ctags"
 let g:NERDTreeQuitOnOpen  = 1
 
+set rtp+=~/.janus/vundle/
+call vundle#rc()
+Bundle 'sickill/vim-sunburst'
+Bundle 'Lokaltog/vim-distinguished'
+Bundle 'guns/xterm-color-table.vim'
+Bundle 'tpope/vim-cucumber'
+Bundle 'vim-scripts/multiselect'
+Bundle 'vim-scripts/genutils'
+Bundle 'altercation/vim-colors-solarized'
+Bundle 'vim-scripts/twilight256.vim'
+Bundle 'vim-scripts/bufexplorer.zip'
+Bundle 'tpope/vim-dispatch'
+Bundle 'thoughtbot/vim-rspec'
