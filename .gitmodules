@@ -1,36 +1,3 @@
-#[submodule "ctrlp"]
-#	path = ctrlp
-#	url = https://github.com/kien/ctrlp.vim.git
-[submodule "vim-sunburst"]
-	path = vim-sunburst
-	url = https://github.com/sickill/vim-sunburst
-[submodule "xterm-color-table.vim"]
-	path = xterm-color-table.vim
-	url = https://github.com/guns/xterm-color-table.vim
-[submodule "vim-cucumber"]
-	path = vim-cucumber
-	url = https://github.com/tpope/vim-cucumber.git
-[submodule "multiselect"]
-	path = multiselect
-	url = https://github.com/vim-scripts/multiselect.git
-[submodule "genutils"]
-	path = genutils
-	url = https://github.com/vim-scripts/genutils.git
-[submodule "vim-colors-solarized"]
-	path = vim-colors-solarized
-	url = https://github.com/altercation/vim-colors-solarized.git
-[submodule "twilight256.vim"]
-	path = twilight256.vim
-	url = https://github.com/vim-scripts/twilight256.vim.git
-[submodule "bufexplorer.zip"]
-	path = bufexplorer.zip
-	url = git://github.com/vim-scripts/bufexplorer.zip.git
-[submodule "vim-distinguished"]
-	path = vim-distinguished
-	url = git://github.com/Lokaltog/vim-distinguished.git
-[submodule "vim-dispatch"]
-	path = vim-dispatch
-	url = https://github.com/tpope/vim-dispatch.git
-[submodule "vim-rspec"]
-	path = vim-rspec
-	url = git://github.com/thoughtbot/vim-rspec.git
+[submodule ".janus/vundle"]
+	path = .janus/vundle
+	url = https://github.com/gmarik/vundle.git
