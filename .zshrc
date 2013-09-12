@@ -41,8 +41,6 @@ source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 
-[[ -e $HOME/.zsh/git-flow-completion.zsh ]] && $HOME/.zsh/git-flow-completion.zsh
-
 if [ -d $HOME/.profile.d ]; then
   for i in $HOME/.profile.d/*.sh; do
     if [ -r $i ]; then
@@ -54,3 +52,6 @@ fi
 
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
+
+. ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
+
