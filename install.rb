@@ -12,7 +12,15 @@ def doLink(fn, dst)
   end
 end
 
-doLink(".vimrc.before", "~")
-doLink(".vimrc.after", "~")
-doLink(".zshrc", "~")
-doLink(".tmux.conf", "~")
+def doRun(cmd)
+  puts "$: #{cmd}"
+  system(cmd) || raise("command failed with status: #{$?.exitstatus}")
+end
+
+doRun "git submodule init && git submodule sync && git submodule update"
+
+doLink ".vimrc.before", "~"
+doLink ".vimrc.after", "~"
+doLink ".zshrc", "~"
+doLink ".tmux.conf", "~"
+doLink ".janus", "~"
