@@ -22,9 +22,15 @@
 [submodule "twilight256.vim"]
 	path = twilight256.vim
 	url = https://github.com/vim-scripts/twilight256.vim.git
-[submodule "ShowMarks"]
-	path = ShowMarks
-	url = https://github.com/vim-scripts/ShowMarks.git
 [submodule "bufexplorer.zip"]
 	path = bufexplorer.zip
 	url = git://github.com/vim-scripts/bufexplorer.zip.git
+[submodule "vim-distinguished"]
+	path = vim-distinguished
+	url = git://github.com/Lokaltog/vim-distinguished.git
+[submodule "vim-dispatch"]
+	path = vim-dispatch
+	url = https://github.com/tpope/vim-dispatch.git
+[submodule "vim-rspec"]
+	path = vim-rspec
+	url = git://github.com/thoughtbot/vim-rspec.git
