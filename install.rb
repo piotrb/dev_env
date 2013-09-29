@@ -30,3 +30,5 @@ doLink ".gitignore", "~"
 doLink ".gvimrc.after", "~"
 doLink ".profile.d", "~"
 doLink ".powconfig", "~"
+
+doRun "git config --global core.excludesfile ${HOME}/.gitignore"
