@@ -1,0 +1,7 @@
+. ~/.bashrc
+
+export ENABLE_REMOTE_DEBUGGER_UNDER_POW=true
+
+# 1h timeout
+export POW_TIMEOUT=3600
+export POW_WORKERS=2

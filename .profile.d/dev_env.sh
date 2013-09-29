@@ -6,7 +6,7 @@ export PATH="$HOME/bin:/usr/local/bin:/usr/local/sbin:$PATH"
 
 #export CC=/usr/bin/gcc-4.2 # needed for Lion only
 
-export MYSQL_UNIX_PORT=/tmp/mysqld.sock
+export MYSQL_UNIX_PORT=/tmp/mysql.sock
 
 alias cucumber="bundle exec cucumber"
 
