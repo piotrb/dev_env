@@ -36,6 +36,7 @@ doLink ".gitignore", "~"
 doLink ".gvimrc.after", "~"
 doLink ".profile.d", "~"
 doLink ".powconfig", "~"
+doLink ".gemrc", "~"
 doLink "bin", "~"
 
 git_config = {
