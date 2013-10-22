@@ -58,7 +58,23 @@ git_config = {
   },
   push: {
     default: "current"
-  }
+  },
+  status: {
+    showUntrackedFiles: "all"
+  },
+  branch: {
+    autosetupmerge: "true",
+    autosetuprebase: "always",
+  },
+  alias: {
+    ct: "status",
+    ci: "commit",
+    br: "branch",
+    co: "checkout",
+    df: "diff",
+    lp: "log -p",
+    cp: "cherry-pick",
+  },
 }
 
 flat_hash(git_config).each do |k,v|
