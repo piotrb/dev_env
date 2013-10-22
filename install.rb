@@ -1,12 +1,15 @@
 #!env ruby
-# vim: fdm=syntax fdl=0:
+# vim: fdm=syntax:
 require 'fileutils'
 require 'pathname'
 
-def doLink(fn, dst)
+def doLink(fn, dst, options = {})
+  options = {
+    :as => fn,
+  }.merge(options)
   dst = File.expand_path(dst)
   src = File.expand_path(fn)
-  full_dst = "#{dst}/#{fn}"
+  full_dst = "#{dst}/#{options[:as]}"
   unless File.exist?(full_dst)
     FileUtils.ln_s(src, full_dst)
     puts "ln: #{src} -> #{full_dst}"
@@ -16,6 +19,14 @@ end
 def doRun(cmd)
   puts "$: #{cmd}"
   system(cmd) || raise("command failed with status: #{$?.exitstatus}")
+end
+
+def doDir(path)
+  path = File.expand_path(path)
+  unless File.exist?(path)
+    puts "mkdir: #{path}"
+    FileUtils.mkdir_p(path)
+  end
 end
 
 def flat_hash(hash, k = [])
@@ -38,6 +49,8 @@ doLink ".profile.d", "~"
 doLink ".powconfig", "~"
 doLink ".gemrc", "~"
 doLink "bin", "~"
+doDir "~/.config"
+doLink "config/powerline", "~", :as => ".config/powerline"
 
 git_config = {
   core: {
