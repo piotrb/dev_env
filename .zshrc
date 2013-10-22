@@ -47,6 +47,11 @@ if [ -d $HOME/.profile.d ]; then
       . $i
     fi
   done
+  for i in $HOME/.profile.d/*.zsh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
   unset i
 fi
 
