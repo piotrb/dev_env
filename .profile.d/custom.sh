@@ -15,17 +15,21 @@ function gemo() {
   back=`pwd`
   dir=`bundle list $1`
   cd "$dir"
-  mvim .
+  vim .
   unset dir
   cd "$back"
   unset back
 }
 
-alias rgm="rails g migration"
-alias unicorn="bundle exec unicorn"
-alias rdbc="rake db:branch:cleanup"
-alias be="bundle exec"
-alias g="git"
+#alias rgm="rails g migration"
+#alias unicorn="bundle exec unicorn"
+#alias rdbc="rake db:branch:cleanup"
+#alias be="bundle exec"
+#alias g="git"
+
+alias rspec="spring rspec"
+alias cucumber="spring cucumber"
+alias rails="spring rails"
 
 #export PATH=/Users/piotr/bin/Sencha/Cmd/3.1.0.256:/usr/local/share/npm/bin:$PATH
 #export SENCHA_CMD_3_0_0="/Users/piotr/bin/Sencha/Cmd/3.1.0.256"

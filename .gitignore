@@ -25,3 +25,6 @@ build/*
 
 # ctags
 tags
+idea
+bin/mate
+bin/mine

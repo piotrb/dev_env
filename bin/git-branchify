@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+name = $stdin.readline
+
+name = name.downcase.gsub(/[^a-z0-9]/, ' ').gsub(/ +/, ' ').strip.gsub(' ', '-')
+
+system "git checkout -b #{name.inspect}"

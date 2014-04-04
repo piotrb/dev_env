@@ -52,6 +52,7 @@ doLink "bin", "~"
 doDir "~/.config"
 doLink "config/powerline", "~", :as => ".config/powerline"
 
+
 git_config = {
   core: {
     excludesfile: File.expand_path("~/.gitignore")
@@ -74,6 +75,7 @@ git_config = {
     df: "diff",
     lp: "log -p",
     cp: "cherry-pick",
+    lg: "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)%Creset' --abbrev-commit",
   },
 }
 

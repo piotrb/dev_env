@@ -1,6 +1,7 @@
 #export EDITOR="$HOME/bin/mate_editor"
 export EDITOR="vim"
 export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 export PATH="$HOME/bin:/usr/local/bin:/usr/local/sbin:$PATH"
 
@@ -12,9 +13,13 @@ alias cucumber="bundle exec cucumber"
 
 alias rspec="bundle exec rspec"
 
+alias ph="bundle exec ph"
+
 alias r="rspec"
 
 alias dl="~/Work/dev_launcher/run.sh"
+
+alias cap="bundle exec cap"
 
 export SPEC_OPTS=--color
 

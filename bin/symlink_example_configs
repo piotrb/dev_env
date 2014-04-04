@@ -1,0 +1,14 @@
+#!env ruby
+
+require 'fileutils'
+
+Dir["config/*.example"].each do |file|
+  fn2 = file.gsub /\.example$/, ''
+  print "#{file} ... "
+  if File.exist?(fn2)
+    puts "skipping, already exists"
+  else
+    FileUtils.cp(file, fn2)
+    puts "created"
+  end
+end

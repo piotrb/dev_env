@@ -1,0 +1,31 @@
+#!env ruby
+
+branches = []
+current_branch = nil
+
+`git branch --merged`.strip.split("\n").each do |line|
+  line.strip!
+  if line =~ /^\*/
+    line.gsub!(/^\* /, '')
+    current_branch = line
+  end
+  branches << line
+end
+
+raise "should be ran from master" unless current_branch == "master"
+
+branches -= ["master", current_branch, "release"]
+
+def sh(cmd)
+  puts "# #{cmd}"
+  r = system(cmd)
+  raise "execution failed: #{$?.status}" unless r
+end
+
+if branches.empty?
+  puts "nothing to clean up"
+end
+
+branches.each do |branch|
+  sh "git branch -d #{branch.inspect}"
+end

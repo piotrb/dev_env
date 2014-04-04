@@ -1,1 +1,0 @@
-/Users/piotr/Work/dev_launcher/config/profile.sh
