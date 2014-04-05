@@ -1,0 +1,10 @@
+#!env ruby
+if File.exist?('config/application.rb') || File.exist?('config/spring.rb')
+  exec 'spring', *ARGV
+else
+  if File.exist?('Gemfile')
+    exec 'bundle', 'exec', *ARGV
+  else
+    exec *ARGV
+  end
+end
