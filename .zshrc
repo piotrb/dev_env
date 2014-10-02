@@ -5,7 +5,7 @@ ZSH=$HOME/.oh-my-zsh
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="sorin"
+ZSH_THEME="agnoster"
 #ZSH_THEME="geoffgarside"
 #ZSH_THEME="tonotdo"
 #ZSH_THEME="tjkirch"
@@ -57,11 +57,3 @@ if [ -d $HOME/.profile.d ]; then
   done
   unset i
 fi
-
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
-
-if [ -e ~/Library/Python/2.7/lib/python/site-packages/powerline ]; then
-  . ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
-fi
-
