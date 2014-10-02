@@ -1,5 +1,5 @@
 if [ -e ~/.python/lib/Python2.7/site-packages/powerline ]; then
-  POWERLINE_BASE=~/.python/lib/Python2.7/site-packages/powerline
+  export POWERLINE_BASE=~/.python/lib/Python2.7/site-packages/powerline
   export PATH=~/.python/bin:$PATH
 fi
 
