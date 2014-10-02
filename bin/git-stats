@@ -1,0 +1,27 @@
+#!env ruby
+require 'pp'
+require 'date'
+require 'rubygems'
+require 'active_support/all'
+require 'chronic'
+
+from, to = ARGV
+
+from_date = Chronic.parse(from).strftime("%b %m %Y")
+to_date = Chronic.parse(to).strftime("%b %m %Y")
+
+  cmd = %{git log --before='#{to_date}' --after='#{from_date}' --pretty=format:"%H\t%aN\t%ad"}
+  revs = `#{cmd}`.split("\n").map(&:strip).map { |x| x.split("\t") }
+
+  stats = {}
+
+  revs.each do |sha,name,time|
+    time = Time.parse(time)
+    date = time.strftime("%Y-%m")
+    stats[date] ||= {}
+    stats[date][name] ||= 0
+    stats[date][name] += 1
+  end
+
+  pp stats
+

@@ -38,7 +38,7 @@ ZSH_THEME="sorin"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git rails textmate ruby cucumber brew gem heroku rake vagrant pow tmux vagrant)
+plugins=(git rails ruby brew gem heroku rake pow tmux)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -64,3 +64,4 @@ export PATH="/usr/local/heroku/bin:$PATH"
 if [ -e ~/Library/Python/2.7/lib/python/site-packages/powerline ]; then
   . ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
 fi
+

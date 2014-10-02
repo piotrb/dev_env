@@ -1,0 +1,4 @@
+git checkout master
+git pull -p
+git-prune-merged
+git prune-tags
