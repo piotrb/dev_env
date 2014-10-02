@@ -25,6 +25,15 @@ build/*
 
 # ctags
 tags
-idea
-bin/mate
-bin/mine
+*.xccheckout
+
+# Idea
+.idea/
+.rakeTasks
+*.iml
+
+
+Gemfile.dev
+Gemfile.dev.lock
+
+railways.cache
