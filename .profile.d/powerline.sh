@@ -1,11 +1,11 @@
 if [ -e ~/.python/lib/Python2.7/site-packages/powerline ]; then
-  export POWERLINE_BASE=~/.python/lib/Python2.7/site-packages/powerline
-  export PATH=~/.python/bin:$PATH
+  export POWERLINE_BASE=$HOME/.python/lib/Python2.7/site-packages/powerline
+  export PATH=$HOME/.python/bin:$PATH
 fi
 
 if [ -e ~/.local/lib/python2.7/site-packages/powerline ]; then
-  POWERLINE_BASE=~/.local/lib/python2.7/site-packages/powerline
-  export PATH=~/.local/bin:$PATH
+  POWERLINE_BASE=$HOME/.local/lib/python2.7/site-packages/powerline
+  export PATH=$HOME/.local/bin:$PATH
 fi
 
 if [ -e $POWERLINE_BASE ]; then
