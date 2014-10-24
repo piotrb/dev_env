@@ -37,3 +37,6 @@ Gemfile.dev
 Gemfile.dev.lock
 
 railways.cache
+
+.powder
+.yardoc
