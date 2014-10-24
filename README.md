@@ -12,4 +12,6 @@ External Tools
    - rbenv-gem-rehash
    - rbenv-gemset
    - mysql
+   - wget
+   - zpython
  - pow
