@@ -1,23 +1,8 @@
-"set mouse=a
-"set ttymouse=xterm2
+source ~/.vim/bundle.vim
 
-set shortmess+=I
-
-"color sunburst
 color distinguished
-"color wombat
-"color calmar256-dark
-"color jellybeans
-"let g:solarized_termcolors=256
-"se background=dark
-"color solarized
 
-function! CommandCabbr(abbreviation, expansion)
-  execute 'cabbr ' . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
-endfunction
-command! -nargs=+ CommandCabbr call CommandCabbr(<f-args>)
-" Use it on itself to define a simpler abbreviation for itself.
-CommandCabbr ccab CommandCabbr
+""""""""""""""""""""""""""""" Cusror Line
 
 se nocursorline
 se nocursorcolumn
@@ -36,8 +21,54 @@ se nocursorcolumn
 hi Cursor       guibg=#999999 guifg=#000000
 hi SpecialKey   guifg=gray guibg=#660000
 
+""""""""""""""""""""""""""""" Status Line
+
 hi StatusLine cterm=NONE ctermbg=darkgreen ctermfg=black gui=bold guibg=green guifg=black
 hi StatusLineNC cterm=NONE ctermbg=black ctermfg=lightgray gui=bold guibg=black guifg=lightgray
+
+""""""""""""""""""""""""""""" Extra Whitespace
+
+highlight ExtraWhitespace ctermbg=red guibg=red ctermfg=gray guifg=gray
+match ExtraWhitespace /\s\+$/
+autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd InsertLeave * match ExtraWhitespace /\s\+$/
+autocmd BufWinLeave * call clearmatches()
+
+""""""""""""""""""""""""""""" Clipboard
+
+" sets the clipboard to the system clipboard
+"set clipboard=unnamed
+
+""""""""""""""""""""""""""""" Folding
+
+set foldmethod=syntax
+set foldlevelstart=20
+set foldnestmax=5
+
+"Sourced from vim tip: http://vim.wikia.com/wiki/Keep_folds_closed_while_inserting_text
+autocmd InsertEnter * if !exists('w:last_fdm') | let w:last_fdm=&foldmethod | setlocal foldmethod=manual | endif
+autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:last_fdm | unlet w:last_fdm | endif
+
+""""""""""""""""""""""""""""" Views
+
+"autocmd BufWinLeave *.* mkview
+"autocmd BufWinEnter *.* silent loadview
+
+""""""""""""""""""""""""""""" Syntax
+
+au BufNewFile,BufRead *.god set filetype=ruby
+au BufNewFile,BufRead *.rxls set filetype=ruby
+
+""""""""""""""""""""""""""""" Powerline
+
+set statusline=%f\ %m\ %r
+
+python from powerline.vim import setup as powerline_setup
+python powerline_setup()
+python del powerline_setup
+
+""""""""""""""""""""""""""""" Maps
 
 nmap <Leader>N :NERDTreeFind<CR>
 
@@ -47,32 +78,6 @@ nmap <Leader>= :tabnew<cr>
 nmap <Leader>- :tabclose<cr>
 nmap <Leader>, :tabprevious<cr>
 nmap <Leader>. :tabnext<cr>
-
-highlight ExtraWhitespace ctermbg=red guibg=red ctermfg=gray guifg=gray
-match ExtraWhitespace /\s\+$/
-autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
-autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-autocmd InsertLeave * match ExtraWhitespace /\s\+$/
-autocmd BufWinLeave * call clearmatches()
-
-" sets the clipboard to the system clipboard
-"set clipboard=unnamed
-
-let g:miniBufExplVSplit = 20
-let g:tagbar_ctags_bin = "/usr/local/bin/ctags"
-let g:ackprg = 'ag --nogroup --nocolor --column'
-
-set foldmethod=syntax
-set foldlevelstart=20
-set foldnestmax=5
-
-"autocmd BufWinLeave *.* mkview
-"autocmd BufWinEnter *.* silent loadview
-
-autocmd BufReadPost *
-    \ if line("'\"") > 0 && line("'\"") <= line("$") |
-    \ exe "normal g`\"" |
-    \ endif
 
 " quick pane switching
 map <c-h> <C-w>h
@@ -92,24 +97,11 @@ map <Leader>W<Down>  <C-w>J
 map <Leader>W<Up>    <C-w>K
 map <Leader>W<Right> <C-w>L
 
-" text mode fixes
+""""""""""""""""""""""""""""" Customizations
 
-"if !has("gui_macvim") || !has("gui_running")
-  "map <c-t> :CtrlP<CR>
-  "imap <c-t> <ESC>:CtrlP<CR>
-"endif
+let g:NERDTreeQuitOnOpen  = 1
 
-set statusline=%f\ %m\ %r
-
-"Sourced from vim tip: http://vim.wikia.com/wiki/Keep_folds_closed_while_inserting_text
-autocmd InsertEnter * if !exists('w:last_fdm') | let w:last_fdm=&foldmethod | setlocal foldmethod=manual | endif
-autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:last_fdm | unlet w:last_fdm | endif
-
-" additional syntax stuff
-
-au BufNewFile,BufRead *.god set filetype=ruby
-au BufNewFile,BufRead *.rxls set filetype=ruby
-
+""""""""""""""""""""""""""""" Options
 
 set hlsearch      " highlight search terms
 set incsearch     " show search matches as you type
@@ -124,18 +116,7 @@ set noerrorbells         " don't beep
 set nobackup
 set noswapfile
 
-python from powerline.vim import setup as powerline_setup
-python powerline_setup()
-python del powerline_setup
-
 set tags+=gems.tags
 
-
-
-" Rspec.vim mappings
-map <Leader>t :call RunCurrentSpecFile()<CR>
-map <Leader>s :call RunNearestSpec()<CR>
-map <Leader>l :call RunLastSpec()<CR>
-map <Leader>a :call RunAllSpecs()<CR>
-
-let g:rspec_command = "Dispatch spring rspec {spec}"
+" Skip Vim Intro
+set shortmess+=I

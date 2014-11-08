@@ -29,6 +29,20 @@ def doDir(path)
   end
 end
 
+def doClone(repo, path)
+  path = File.expand_path(path)
+  unless File.exist?(path)
+    doRun("git clone #{repo.inspect} #{path.inspect}")
+  end
+end
+
+def doGetHttp(url, path)
+  path = File.expand_path(path)
+  unless File.exist?(path)
+    doRun("curl -LSso #{path.inspect} #{url.inspect}")
+  end
+end
+
 def flat_hash(hash, k = [])
   return {k => hash} unless hash.is_a?(Hash)
   hash.inject({}){ |h, v| h.merge! flat_hash(v[-1], k + [v[0]]) }
@@ -36,8 +50,7 @@ end
 
 doRun "git submodule init && git submodule sync && git submodule update"
 
-doLink ".vimrc.before", "~"
-doLink ".vimrc.after", "~"
+doLink ".vimrc", "~"
 doLink ".zshrc", "~"
 doLink ".tmux.conf", "~"
 doLink ".janus", "~"
@@ -50,6 +63,13 @@ doLink ".powconfig", "~"
 doLink ".gemrc", "~"
 doLink "bin", "~"
 doDir "~/.config"
+
+# vim
+doDir "~/.vim/bundle"
+doClone 'https://github.com/gmarik/Vundle.vim.git', '~/.vim/bundle/Vundle.vim'
+doLink "vim/bundle.vim", "~/.vim", as: 'bundle.vim'
+
+# powerline
 doLink "config/powerline", "~", :as => ".config/powerline"
 
 
