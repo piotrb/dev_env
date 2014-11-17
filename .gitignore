@@ -12,10 +12,10 @@ build/*
 
 # Textmate - if you build your xcode projects with it
 *.tm_build_errors
- 
+
 # old skool
 .svn
- 
+
 # osx noise
 .DS_Store
 
@@ -40,3 +40,8 @@ railways.cache
 
 .powder
 .yardoc
+
+bin/wkhtmltopdf
+bin/vimr
+bin/mine
+bin/mate

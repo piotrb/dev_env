@@ -74,6 +74,9 @@ doLink "config/powerline", "~", :as => ".config/powerline"
 
 
 git_config = {
+  fetch: {
+    prune: true,
+  },
   core: {
     excludesfile: File.expand_path("~/.gitignore")
   },

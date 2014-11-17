@@ -3,7 +3,6 @@ dev_env
 
 My Development Environment Stuff
 
-
 External Tools
 
  - homebrew
