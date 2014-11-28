@@ -10,6 +10,15 @@ def doLink(fn, dst, options = {})
   dst = File.expand_path(dst)
   src = File.expand_path(fn)
   full_dst = "#{dst}/#{options[:as]}"
+  if File.exist?(full_dst)
+    if File.symlink?(full_dst)
+      unless File.readlink(full_dst) == src
+        File.unlink(full_dst)
+      end
+    else
+      File.unlink(full_dst)
+    end
+  end
   unless File.exist?(full_dst)
     FileUtils.ln_s(src, full_dst)
     puts "ln: #{src} -> #{full_dst}"
@@ -50,6 +59,8 @@ end
 
 doRun "git submodule init && git submodule sync && git submodule update"
 
+doClone "git://github.com/robbyrussell/oh-my-zsh.git", "~/.oh-my-zsh"
+
 doLink ".vimrc", "~"
 doLink ".zshrc", "~"
 doLink ".tmux.conf", "~"
@@ -68,6 +79,11 @@ doDir "~/.config"
 doDir "~/.vim/bundle"
 doClone 'https://github.com/gmarik/Vundle.vim.git', '~/.vim/bundle/Vundle.vim'
 doLink "vim/bundle.vim", "~/.vim", as: 'bundle.vim'
+
+powerline_lib = "~/.local/lib/python2.7/site-packages/powerline/"
+unless File.exist?(File.expand_path(powerline_lib))
+  doRun "pip install --user git+git://github.com/Lokaltog/powerline"
+end
 
 # powerline
 doLink "config/powerline", "~", :as => ".config/powerline"
