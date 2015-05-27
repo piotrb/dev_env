@@ -25,6 +25,7 @@ Bundle 'vim-ruby/vim-ruby'
 Bundle 'derekwyatt/vim-scala'
 Bundle 'cakebaker/scss-syntax.vim'
 Bundle 'elzr/vim-json'
+Bundle 'stephpy/vim-yaml'
 
 " Util
 

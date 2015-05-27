@@ -1,5 +1,10 @@
 #!/usr/bin/env ruby
 
+def sh(cmd)
+  puts "$ #{cmd}"
+  system(cmd) || raise("command failed: #{$?.exitstatus}")
+end
+
 if ARGV.empty?
   name = $stdin.readline
 else
@@ -8,4 +13,6 @@ end
 
 name = name.downcase.gsub(/[^a-z0-9]/, ' ').gsub(/ +/, ' ').strip.gsub(' ', '-')
 
-system "git checkout -b #{name.inspect}"
+sh "git checkout -b #{name.inspect}"
+sh "git config branch.#{name}.remote origin"
+sh "git config branch.#{name}.merge refs/heads/#{name}"

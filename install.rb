@@ -53,7 +53,6 @@ doRun "git submodule init && git submodule sync && git submodule update"
 doLink ".vimrc", "~"
 doLink ".zshrc", "~"
 doLink ".tmux.conf", "~"
-doLink ".janus", "~"
 doLink ".bash_profile", "~"
 doLink ".bashrc", "~"
 doLink ".gitignore", "~"
@@ -78,13 +77,14 @@ git_config = {
     prune: true,
   },
   core: {
-    excludesfile: File.expand_path("~/.gitignore")
+    mergeoptions: '--no-edit',
+    excludesfile: File.expand_path("~/.gitignore"),
   },
   push: {
-    default: "current"
+    default: "current",
   },
   status: {
-    showUntrackedFiles: "all"
+    showUntrackedFiles: "all",
   },
   branch: {
     autosetupmerge: "true",

@@ -12,9 +12,9 @@ current_branch = nil
   branches << line
 end
 
-raise "should be ran from master" unless current_branch == "master"
+raise "should be ran from master or develop" unless ["master","develop"].include?(current_branch) || ENV['FORCE']
 
-branches -= ["master", current_branch, "release"]
+branches -= ["develop", "master", current_branch, "releases"]
 
 def sh(cmd)
   puts "# #{cmd}"

@@ -23,8 +23,6 @@ build/*
 .rake_tasks~
 
 
-# ctags
-tags
 *.xccheckout
 
 # Idea
