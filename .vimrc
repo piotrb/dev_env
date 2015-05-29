@@ -1,3 +1,5 @@
+set nocompatible      " We're running Vim, not Vi!
+
 source ~/.vim/bundle.vim
 
 color distinguished
@@ -59,6 +61,13 @@ autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:las
 
 au BufNewFile,BufRead *.god set filetype=ruby
 au BufNewFile,BufRead *.rxls set filetype=ruby
+
+syntax on             " Enable syntax highlighting
+filetype on           " Enable filetype detection
+filetype indent on    " Enable filetype-specific indenting
+filetype plugin on    " Enable filetype-specific plugins
+
+au FileType ruby setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab autoindent
 
 """"""""""""""""""""""""""""" Powerline
 
