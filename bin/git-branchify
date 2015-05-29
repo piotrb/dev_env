@@ -5,6 +5,19 @@ def sh(cmd)
   system(cmd) || raise("command failed: #{$?.exitstatus}")
 end
 
+require 'optparse'
+
+options = {}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: git-branchify [options]"
+
+  opts.on("-f", "--feature", "Create as a Feature branch") do |v|
+    options[:feature] = v
+  end
+
+end.parse!
+
 if ARGV.empty?
   name = $stdin.readline
 else
@@ -12,6 +25,10 @@ else
 end
 
 name = name.downcase.gsub(/[^a-z0-9]/, ' ').gsub(/ +/, ' ').strip.gsub(' ', '-')
+
+if options[:feature]
+  name = "feature/#{name}"
+end
 
 sh "git checkout -b #{name.inspect}"
 sh "git config branch.#{name}.remote origin"
