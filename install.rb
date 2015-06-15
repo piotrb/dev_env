@@ -81,7 +81,7 @@ doLink "vim/bundle.vim", "~/.vim", as: 'bundle.vim'
 
 powerline_lib = "~/.local/lib/python2.7/site-packages/powerline/"
 unless File.exist?(File.expand_path(powerline_lib))
-  doRun "pip install --user git+git://github.com/Lokaltog/powerline"
+  doRun "pip install powerline-status --user --upgrade"
 end
 
 # powerline
