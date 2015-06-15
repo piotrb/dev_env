@@ -123,4 +123,4 @@ flat_hash(git_config).each do |k,v|
   doRun "git config --global #{key} #{v.to_s.inspect}"
 end
 
-doRun "vim +BundleInstall +qall"
+doRun "vim -u /dev/null -N -c 'source ~/.vim/bundle.vim' +BundleInstall +qall"

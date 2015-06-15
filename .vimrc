@@ -80,6 +80,7 @@ python del powerline_setup
 """"""""""""""""""""""""""""" Maps
 
 nmap <Leader>N :NERDTreeFind<CR>
+map <Leader>n :NERDTreeToggle<CR>
 
 map <Leader>ms :MSExecCmd<space>
 
