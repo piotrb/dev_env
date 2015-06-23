@@ -54,6 +54,7 @@ Bundle 'vim-scripts/bufexplorer.zip'
 
 Bundle 'tpope/vim-sensible'
 Bundle 'tpope/vim-rbenv'
+Bundle 'bling/vim-airline'
 
 " Optional
 
