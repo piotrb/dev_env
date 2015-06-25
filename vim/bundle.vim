@@ -55,16 +55,11 @@ Bundle 'vim-scripts/bufexplorer.zip'
 Bundle 'tpope/vim-sensible'
 Bundle 'tpope/vim-rbenv'
 Bundle 'bling/vim-airline'
+Bundle 'suan/vim-instant-markdown'
+Bundle 'jeetsukumaran/vim-buffergator'
+Bundle 'tmhedberg/matchit'
 
 " Optional
 
-"buffergator
-"gundo
-"indent-object
-"matchit
 "snipmate
-"unimpaired
 "vim-snippets
-"visualstar
-"watchtower
-"zoomwin
