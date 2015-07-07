@@ -115,6 +115,17 @@ map <Leader>W<Right> <C-w>L
 """"""""""""""""""""""""""""" Customizations
 
 let g:NERDTreeQuitOnOpen  = 1
+let g:syntastic_ruby_rubocop_exec = 'rubocop.sh'
+let g:syntastic_ruby_checkers = ['ruby', 'rubocop']
+set colorcolumn=120
+
+" RSpec.vim mappings
+map <Leader>T :call RunCurrentSpecFile()<CR>
+map <Leader>S :call RunNearestSpec()<CR>
+map <Leader>L :call RunLastSpec()<CR>
+map <Leader>A :call RunAllSpecs()<CR>
+
+let g:rspec_command = "Dispatch spring rspec -f p -b {spec}"
 
 """"""""""""""""""""""""""""" Options
 
