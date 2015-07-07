@@ -11,6 +11,11 @@ if [ -e ~/.local/lib/python2.7/site-packages/powerline ]; then
   export PATH=$HOME/.local/bin:$PATH
 fi
 
+# linux shared
+if [ -e /usr/local/lib/python2.7/dist-packages/powerline ]; then
+  export POWERLINE_BASE=/usr/local/lib/python2.7/dist-packages/powerline
+fi
+
 if [ -e $POWERLINE_BASE ]; then
   . $POWERLINE_BASE/bindings/zsh/powerline.zsh
   powerline-daemon -q

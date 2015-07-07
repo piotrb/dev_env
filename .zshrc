@@ -44,6 +44,22 @@ source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 
+# load rc scripts
+if [ -d $HOME/.profilerc.d ]; then
+  for i in $HOME/.profilerc.d/*.sh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  for i in $HOME/.profilerc.d/*.zsh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  unset i
+fi
+
+# load profile scripts
 if [ -d $HOME/.profile.d ]; then
   for i in $HOME/.profile.d/*.sh; do
     if [ -r $i ]; then

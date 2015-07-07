@@ -1,5 +1,5 @@
 # load profile scripts
-if [ -d $HOME/.profile.d ]; then
+if [ -d $HOME/.profilerc.d ]; then
   for i in $HOME/.profile.d/*.sh; do
     if [ -r $i ]; then
       . $i
