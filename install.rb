@@ -72,6 +72,7 @@ doLink ".profile.d", "~"
 doLink ".profilerc.d", "~"
 doLink ".powconfig", "~"
 doLink ".gemrc", "~"
+doLink ".tigrc", "~"
 doLink "bin", "~"
 doDir "~/.config"
 

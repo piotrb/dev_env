@@ -1,0 +1,3 @@
+bind status + !git commit --amend
+bind status I !git add -p %(file)
+set vertical-split = true
