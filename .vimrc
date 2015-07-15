@@ -127,6 +127,14 @@ map <Leader>A :call RunAllSpecs()<CR>
 
 let g:rspec_command = "Dispatch spring rspec -f p -b {spec}"
 
+let g:ctrlp_user_command = {
+	\ 'types': {
+		\ 1: ['.git', 'cd %s && git ls-files'],
+		\ 2: ['.hg', 'hg --cwd %s locate -I .'],
+		\ },
+	\ 'fallback': 'find %s -type f'
+	\ }
+
 """"""""""""""""""""""""""""" Options
 
 set hlsearch      " highlight search terms

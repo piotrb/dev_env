@@ -29,6 +29,7 @@ Plugin 'derekwyatt/vim-scala'
 Plugin 'cakebaker/scss-syntax.vim'
 Plugin 'elzr/vim-json'
 Plugin 'stephpy/vim-yaml'
+Plugin 'slim-template/vim-slim'
 
 " Util
 
