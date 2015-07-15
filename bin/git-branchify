@@ -16,6 +16,10 @@ OptionParser.new do |opts|
     options[:feature] = v
   end
 
+  opts.on("-e", "--epic", "Create as an Epic branch") do |v|
+    options[:epic] = v
+  end
+
 end.parse!
 
 if ARGV.empty?
@@ -28,6 +32,10 @@ name = name.downcase.gsub(/[^a-z0-9]/, ' ').gsub(/ +/, ' ').strip.gsub(' ', '-')
 
 if options[:feature]
   name = "feature/#{name}"
+end
+
+if options[:epic]
+  name = "epic/#{name}"
 end
 
 sh "git checkout -b #{name.inspect}"
