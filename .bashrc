@@ -1,6 +1,6 @@
 # load profile scripts
 if [ -d $HOME/.profilerc.d ]; then
-  for i in $HOME/.profile.d/*.sh; do
+  for i in $HOME/.profilerc.d/*.sh; do
     if [ -r $i ]; then
       . $i
     fi

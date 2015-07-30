@@ -30,11 +30,13 @@ Plugin 'cakebaker/scss-syntax.vim'
 Plugin 'elzr/vim-json'
 Plugin 'stephpy/vim-yaml'
 Plugin 'slim-template/vim-slim'
+Plugin 'vim-scripts/bash-support.vim'
 
 " Util
 
 Plugin 'rking/ag.vim'
 
+Plugin 'chrisbra/SudoEdit.vim'
 Plugin 'skammer/vim-css-color'
 Plugin 'kien/ctrlp.vim'
 Plugin 'tpope/vim-dispatch'

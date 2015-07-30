@@ -20,6 +20,10 @@ OptionParser.new do |opts|
     options[:epic] = v
   end
 
+  opts.on("-s", "--sub", "Create a sub branch (current-new name)") do |v|
+    options[:sub] = v
+  end
+
 end.parse!
 
 if ARGV.empty?
@@ -29,6 +33,11 @@ else
 end
 
 name = name.downcase.gsub(/[^a-z0-9]/, ' ').gsub(/ +/, ' ').strip.gsub(' ', '-')
+
+if options[:sub]
+  current_branch = `git rev-parse --symbolic-full-name --abbrev-ref HEAD`.strip
+  name = "#{current_branch}-#{name}"
+end
 
 if options[:feature]
   name = "feature/#{name}"
