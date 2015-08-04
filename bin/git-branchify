@@ -20,6 +20,10 @@ OptionParser.new do |opts|
     options[:epic] = v
   end
 
+  opts.on("--hotfix", "Create a a hotfix branch") do |v|
+    options[:hotfix] = v
+  end
+
 end.parse!
 
 if ARGV.empty?
@@ -36,6 +40,10 @@ end
 
 if options[:epic]
   name = "epic/#{name}"
+end
+
+if options[:hotfix]
+  name = "hotfix/#{name}"
 end
 
 sh "git checkout -b #{name.inspect}"
