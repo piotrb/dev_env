@@ -13,6 +13,7 @@ Plugin 'Lokaltog/vim-distinguished'
 
 " Lang
 
+Plugin 'fatih/vim-go'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'chrisbra/csv.vim'
 Plugin 'tpope/vim-cucumber'
