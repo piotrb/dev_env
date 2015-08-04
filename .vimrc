@@ -4,6 +4,8 @@ source ~/.vim/bundle.vim
 
 color distinguished
 
+set modeline
+
 """"""""""""""""""""""""""""" Cusror Line
 
 se nocursorline
@@ -68,6 +70,8 @@ filetype indent on    " Enable filetype-specific indenting
 filetype plugin on    " Enable filetype-specific plugins
 
 au FileType ruby setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab autoindent
+
+au FileType gitcommit set tw=0
 
 """"""""""""""""""""""""""""" Powerline
 
