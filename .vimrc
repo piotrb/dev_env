@@ -70,8 +70,13 @@ filetype indent on    " Enable filetype-specific indenting
 filetype plugin on    " Enable filetype-specific plugins
 
 au FileType ruby setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab autoindent
+au FileType shell setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab autoindent
 
 au FileType gitcommit set tw=0
+
+set listchars=tab:▸\ ,eol:¬
+set list!
+nmap <leader>l :set list!<CR>
 
 """"""""""""""""""""""""""""" Powerline
 

@@ -1,3 +1,5 @@
+echo "Disabling git gui ..."
+
 git()
 {
   if [ "$1" = "gui" ]; then
