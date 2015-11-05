@@ -6,6 +6,7 @@ alias yard="bundle exec yard"
 alias yardoc="bundle exec yardoc"
 alias rake="spring_wrapper rake"
 alias rails="spring_wrapper rails"
+alias guard="bundle exec guard"
 alias rdbm="rake db:migrate db:test:prepare"
 
 alias teaspoon="spring_wrapper teaspoon -d phantomjs -q --format=tap_y | tapout progress"

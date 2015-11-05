@@ -40,6 +40,21 @@ source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 
+# load global rc scripts
+if [ -d /etc/profile.d ]; then
+  for i in /etc/profile.d/*.sh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  #for i in /etc/profile.d/*.zsh; do
+  #  if [ -r $i ]; then
+  #    . $i
+  #  fi
+  #done
+  unset i
+fi
+
 # load rc scripts
 if [ -d $HOME/.profilerc.d ]; then
   for i in $HOME/.profilerc.d/*.sh; do
