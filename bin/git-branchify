@@ -40,6 +40,7 @@ name = name.downcase.gsub(/[^a-z0-9]/, ' ').gsub(/ +/, ' ').strip.gsub(' ', '-')
 
 if options[:sub]
   current_branch = `git rev-parse --symbolic-full-name --abbrev-ref HEAD`.strip
+  current_branch = current_branch.split("/").last
   name = "#{current_branch}-#{name}"
 end
 
