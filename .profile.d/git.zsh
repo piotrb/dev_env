@@ -1,4 +1,4 @@
-echo "Disabling git gui ..."
+echo -n "[git]"
 
 git()
 {

@@ -1,5 +1,5 @@
 #!/bin/bash - 
 if [[ `uname` = 'Linux' ]]; then
-  echo "Setting X Display to :1 ..."
+  echo -n "[X11]"
   export DISPLAY=:1
 fi
