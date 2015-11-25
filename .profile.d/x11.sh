@@ -1,14 +1,6 @@
-export DISPLAY=:0
+#!/bin/bash - 
+if [[ `uname` = 'Linux' ]]; then
+  echo "Setting X Display to :1 ..."
+  export DISPLAY=:1
+fi
 
-function withx {
-  {
-    xinit &
-    xpid=$!
-    sleep 0.1 
-  } 2>/dev/null >/dev/null
-
-  trap "echo 'waiting for child to die ...'" SIGHUP SIGINT SIGTERM
-  eval $*
-  kill $xpid
-  trap - SIGHUP SIGINT SIGTERM
-}

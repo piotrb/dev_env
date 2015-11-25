@@ -1,3 +1,4 @@
+# vim: ts=2:et:sw=2
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
@@ -40,14 +41,19 @@ source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 
-# load rc scripts
-if [ -d $HOME/.profilerc.d ]; then
-  for i in $HOME/.profilerc.d/*.sh; do
+# load global rc scripts
+if [ -d /etc/profile.d ]; then
+  for i in /etc/profile.d/*.(zsh|sh); do
     if [ -r $i ]; then
       . $i
     fi
   done
-  for i in $HOME/.profilerc.d/*.zsh; do
+  unset i
+fi
+
+# load rc scripts
+if [ -d $HOME/.profilerc.d ]; then
+  for i in $HOME/.profilerc.d/*.(zsh|sh); do
     if [ -r $i ]; then
       . $i
     fi
@@ -57,12 +63,7 @@ fi
 
 # load profile scripts
 if [ -d $HOME/.profile.d ]; then
-  for i in $HOME/.profile.d/*.sh; do
-    if [ -r $i ]; then
-      . $i
-    fi
-  done
-  for i in $HOME/.profile.d/*.zsh; do
+  for i in $HOME/.profile.d/*.(zsh|sh); do
     if [ -r $i ]; then
       . $i
     fi
