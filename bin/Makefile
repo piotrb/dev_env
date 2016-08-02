@@ -1,14 +1,8 @@
+.DEFAULT_GOAL := build
 
-CRYSTAL = crystal
+phony: build clean
 
-git-branchify: src/git-branchify.cr
-	$(CRYSTAL) build --release "$<" -o "$@"
-
-git-prune-merged: src/git-prune-merged.cr
-	$(CRYSTAL) build --release "$<" -o "$@"
-
-phony: build
-
-build: git-branchify git-prune-merged
-
-
+clean:
+	cd src; $(MAKE) clean
+build:
+	cd src; $(MAKE) build
