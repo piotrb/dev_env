@@ -91,6 +91,9 @@ doLink "config/powerline", "~", :as => ".config/powerline"
 
 
 git_config = {
+  pull: {
+    rebase: true,
+  },
   fetch: {
     prune: true,
   },
@@ -104,19 +107,24 @@ git_config = {
   status: {
     showUntrackedFiles: "all",
   },
-  branch: {
-    autosetupmerge: "true",
-    autosetuprebase: "always",
+  diff: {
+    compactionHeuristic: 1,
+  },
+  pager: {
+    log: 'diff-highlight | less',
+    show: 'diff-highlight | less',
+    diff: 'diff-highlight | less',
   },
   alias: {
-    ct: "status",
-    ci: "commit",
-    br: "branch",
-    co: "checkout",
-    df: "diff",
-    lp: "log -p",
-    cp: "cherry-pick",
+    #ct: "status",
+    #ci: "commit",
+    #br: "branch",
+    #co: "checkout",
+    #df: "diff",
+    #lp: "log -p",
+    #cp: "cherry-pick",
     lg: "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)%Creset' --abbrev-commit",
+    pf: "push --force-with-lease",
   },
 }
 

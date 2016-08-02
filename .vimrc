@@ -6,6 +6,8 @@ color distinguished
 
 set modeline
 
+let g:Guifont="Menlo Regular for Powerline:h13"
+
 """"""""""""""""""""""""""""" Cusror Line
 
 se nocursorline
@@ -46,9 +48,11 @@ autocmd BufWinLeave * call clearmatches()
 
 """"""""""""""""""""""""""""" Folding
 
-set foldmethod=syntax
-set foldlevelstart=20
-set foldnestmax=5
+"set re=2
+"let g:ruby_fold=1
+"set foldmethod=syntax
+"set foldlevelstart=20
+"set foldnestmax=5
 
 "Sourced from vim tip: http://vim.wikia.com/wiki/Keep_folds_closed_while_inserting_text
 autocmd InsertEnter * if !exists('w:last_fdm') | let w:last_fdm=&foldmethod | setlocal foldmethod=manual | endif
@@ -63,6 +67,7 @@ autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:las
 
 au BufNewFile,BufRead *.god set filetype=ruby
 au BufNewFile,BufRead *.rxls set filetype=ruby
+au BufNewFile,BufRead *.es6 set filetype=javascript
 
 syntax on             " Enable syntax highlighting
 filetype on           " Enable filetype detection
@@ -80,7 +85,7 @@ nmap <leader>l :set list!<CR>
 
 """"""""""""""""""""""""""""" Powerline
 
-set statusline=%f\ %m\ %r
+"set statusline=%f\ %m\ %r
 
 "python from powerline.vim import setup as powerline_setup
 "python powerline_setup()

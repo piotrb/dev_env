@@ -1,0 +1,30 @@
+#!env ruby
+
+require 'pathname'
+require 'fileutils'
+require 'pry'
+
+filename, = ARGV
+
+dir, base = Pathname.new(filename).split
+
+dir = dir.expand_path.to_s.gsub(Dir.getwd, '').gsub(/^\//, '')
+
+dir_parts = dir.split("/")
+
+case dir_parts[0]
+when 'lib'
+  spec_dir = "spec/#{dir}"
+else
+  $stderr.puts "files in #{dir_parts[0]} not supported yet"
+  exit 1
+end
+
+spec_base = base.to_s.gsub(/\.rb$/, '_spec.rb')
+
+spec_name = spec_dir + '/' + spec_base
+
+FileUtils.mkdir_p(spec_dir)
+FileUtils.touch(spec_name)
+
+puts "spec is: #{spec_name}"

@@ -37,9 +37,11 @@ Gemfile.dev.lock
 railways.cache
 
 .powder
+.nospring
+.spring
 .yardoc
 
-bin/wkhtmltopdf
-bin/vimr
-bin/mine
-bin/mate
+.powswitch
+.deps.yml
+
+

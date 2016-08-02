@@ -1,3 +1,4 @@
 bind status + !git commit --amend
 bind status I !git add -p %(file)
+bind stage C !git commit
 set vertical-split = true

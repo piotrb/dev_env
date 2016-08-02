@@ -1,0 +1,70 @@
+#!/usr/bin/ruby
+require 'yaml'
+require 'shellwords'
+
+if File.exist?(".env.muxp")
+  env = YAML.load_file(".env.muxp")
+  env.each do |k,v|
+    ENV[k] = v.to_s
+  end
+end
+
+ignored_tasks = %w(web)
+ignored_tasks = [] if ENV['WEB']
+
+project = File.basename(Dir.getwd)
+tasks = YAML.load_file("Procfile")
+ignored_tasks.each do |task_name|
+  tasks.delete(task_name)
+end
+
+def session_running?(project)
+  system("tmux has-session -t #{project.inspect} 2>/dev/null")
+  $?.success?
+end
+
+def tmux_bin
+  `which tmux`.strip
+end
+
+def tmux(cmd, raise_on_error: true, mode: :system)
+  case mode
+  when :system
+    system("tmux #{cmd}")
+    unless $?.success?
+      raise("failed") if raise_on_error
+      return false
+    end
+    true
+  when :exec
+    exec tmux_bin, *Shellwords.shellwords(cmd)
+  end
+end
+
+if session_running?(project)
+  puts "Killing existing session ..."
+  tmux(%{kill-session -t "#{project}"})
+end
+
+puts "Starting new session ..."
+tmux %{new-session -s "#{project}" -n "#{project} Main" -d}
+
+tmux %{set-window-option remain-on-exit on}
+tmux %{set mouse on}
+
+if tasks.length > 0
+  keys = tasks.keys
+  first_key = keys.pop
+  tmux %{split-window -v -p 30 -t "#{project}:1" #{tasks[first_key].inspect}}
+  keys.each do |key|
+    tmux %{split-window -h -t "#{project}:1" #{tasks[key].inspect}}
+  end
+end
+
+tmux %{new-window -t "#{project}:2" -n "Log" tail -n 0 -f log/development.log}
+
+tmux %{select-window -t "#{project}:1"}
+
+puts "\e]0;tmux: #{project}\007"
+
+tmux %{attach -t "#{project}"}, mode: :exec

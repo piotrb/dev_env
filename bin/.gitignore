@@ -1,0 +1,12 @@
+wkhtmltopdf*
+
+subl
+vimr
+mine
+mate
+
+git-branchify
+git-prune-merged
+
+src/.shards
+src/libs
