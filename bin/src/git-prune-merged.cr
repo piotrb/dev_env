@@ -43,7 +43,9 @@ branches.each do |branch|
       puts "merge failed"
     end
   ensure
-    system "git merge --abort"
+    if File.exists?(".git/MERGE_HEAD")
+      system "git merge --abort"
+    end
     system "git clean -fq"
   end
 end

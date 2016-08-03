@@ -83,6 +83,10 @@ set listchars=tab:▸\ ,eol:¬
 set list!
 nmap <leader>l :set list!<CR>
 
+if has("autocmd")
+  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif
+
 """"""""""""""""""""""""""""" Powerline
 
 "set statusline=%f\ %m\ %r
