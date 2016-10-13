@@ -32,7 +32,7 @@ branches.each do |branch|
     system "git clean -fq"
     system "git merge --no-commit --no-ff #{branch.inspect} 2>/dev/null 1>/dev/null"
     if $?.success?
-      changed = `git status --porcelain`.split("\n").map { |s| s.rstrip }
+      changed = `git status --porcelain`.rstrip.split("\n").map { |s| s.rstrip }.reject { |s| s == "" }
       if changed.empty?
         puts "merged cleanly ..."
         candidates << branch

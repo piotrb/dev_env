@@ -153,6 +153,8 @@ let g:ctrlp_user_command = {
 	\ 'fallback': 'find %s -type f'
 	\ }
 
+autocmd BufNewFile,BufRead *.slim setlocal filetype=slim
+
 """"""""""""""""""""""""""""" Options
 
 set hlsearch      " highlight search terms

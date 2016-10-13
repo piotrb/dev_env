@@ -1,19 +1,24 @@
+.SUFFIXES:
+	MAKEFLAGS += -r
+
 CRYSTAL = crystal
+GO = go
+GOLIB_DEPS = $(wildcard golib/**/*.go)
 
 .DEFAULT_GOAL := build
 
-TARGETS = ../git-branchify ../git-prune-merged ../git-prune-tags ../spring_wrapper
+GO_FILES = $(wildcard *.go)
+GO_TARGETS = $(patsubst %.go,../%,$(GO_FILES))
 
-../git-branchify: git-branchify.cr
-	$(CRYSTAL) build --release "$<" -o "$@"
+CR_FILES = $(wildcard *.cr)
+CR_TARGETS = $(patsubst %.cr,../%,$(CR_FILES))
 
-../git-prune-merged: git-prune-merged.cr
-	$(CRYSTAL) build --release "$<" -o "$@"
+TARGETS = $(CR_TARGETS) $(GO_TARGETS)
 
-../git-prune-tags: git-prune-tags.cr
-	$(CRYSTAL) build --release "$<" -o "$@"
+../% : %.go $(GOLIB_DEPS)
+	$(GO) build -o "$@" "$<"
 
-../spring_wrapper: spring_wrapper.cr
+../% : %.cr
 	$(CRYSTAL) build --release "$<" -o "$@"
 
 .PHONY: build clean

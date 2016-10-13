@@ -1,0 +1,2 @@
+alias comp=docker-compose
+

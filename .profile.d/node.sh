@@ -1,1 +1,1 @@
-export PATH=$PATH:./node_modules/.bin/:../node_modules/.bin/:../../node_modules/.bin/:../../../node_modules/.bin/
+export PATH=$PATH:./node_modules/.bin:../node_modules/.bin:../../node_modules/.bin:../../../node_modules/.bin
