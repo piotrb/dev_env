@@ -8,6 +8,7 @@ mate
 git-branchify
 git-prune-merged
 spring_wrapper
+bundle_wrapper
 deps
 git-prune-tags
 

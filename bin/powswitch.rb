@@ -42,6 +42,10 @@ when 'run'
     ENV[k] = v.to_s
   end if config['env']
   system "foreman run web"
+when 'info'
+  puts "config file help:"
+  puts "  - links: Array<String> -- names of links to put in pow directory"
+  puts "  - port: Fixnum"
 else
   $stderr.puts "invalid command: #{command.inspect}, valid: link, proxy, run"
   exit 1

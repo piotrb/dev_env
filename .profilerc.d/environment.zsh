@@ -14,3 +14,24 @@ zstyle ':completion:*:cd:*' ignore-parents parent pwd
 
 # fix forward delete
 bindkey "^[[3~" delete-char
+
+
+# Repeatedly try to connect to a host which is booting
+# ssh's return code is a little unhelpful as it doesn't distinguish the failure
+# reason properly so this is a little naive
+function try_ssh () {
+	SUCCESS=0
+	while [ $SUCCESS -eq 0 ]; do
+		ssh -o "ConnectTimeout 30" $*
+		RESULT=$?
+		if [ $RESULT -ne 255 ]; then
+			SUCCESS=1
+		else
+			echo "--> SSH return code was $RESULT"
+			print "Waiting to retry ssh..."
+			sleep 10
+			echo "--> Retrying..."
+		fi
+	done
+}
+

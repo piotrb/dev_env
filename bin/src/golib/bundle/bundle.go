@@ -2,6 +2,8 @@ package bundle
 
 import (
 	"../utils"
+	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -11,11 +13,13 @@ type BundleItem struct {
 	version string
 }
 
-func BundleList() []BundleItem {
-	var out = utils.Backtick("bundle", "list")
-	var lines = strings.Split(out, "\n")
-
+func BundleListE() ([]BundleItem, error) {
 	var result = []BundleItem{}
+	var out, err = utils.BacktickE("bundle", "list")
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Failed getting bundle list: %s\n", out))
+	}
+	var lines = strings.Split(out, "\n")
 
 	re := regexp.MustCompile("\\s+\\* (.+) \\((.+)\\)")
 
@@ -29,15 +33,19 @@ func BundleList() []BundleItem {
 
 	// fmt.Printf("%o", lines)
 
-	return result
+	return result, nil
 }
 
-func BundleHas(gem_name string) bool {
-	list := BundleList()
+func BundleHasE(gem_name string) (bool, error) {
+	list, err := BundleListE()
+	if err != nil {
+		return false, err
+	}
+
 	for _, item := range list {
 		if item.name == gem_name {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }

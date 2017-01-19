@@ -1,14 +1,16 @@
 package gitutil
 
 import (
-	// "fmt"
 	"errors"
 	"github.com/libgit2/git2go"
+	"../utils"
+	"strings"
 )
 
 type BranchInfo struct {
 	Name   string
 	IsHead bool
+	Ref    *git.Reference
 }
 
 func DiscoverRepo(path string) (*git.Repository, error) {
@@ -44,7 +46,7 @@ func AllBranches(repo *git.Repository, flags git.BranchType) ([]BranchInfo, erro
 			return err
 		}
 
-		info := BranchInfo{Name: name, IsHead: isHead}
+		info := BranchInfo{Name: name, IsHead: isHead, Ref: branch.Reference}
 
 		branches = append(branches, info)
 		return nil
@@ -55,17 +57,37 @@ func AllBranches(repo *git.Repository, flags git.BranchType) ([]BranchInfo, erro
 	return branches, nil
 }
 
-func CurrentBranchName(repo *git.Repository) (string, error) {
+func CurrentBranch(repo *git.Repository) (*BranchInfo, error) {
 	branches, err := AllBranches(repo, git.BranchLocal)
 	if err != nil {
-		return "<error>", err
+		return nil, err
 	}
 
 	for _, branch := range branches {
 		if branch.IsHead {
-			return branch.Name, nil
+			return &branch, nil
 		}
 	}
 
-	return "<na>", errors.New("not on a branch")
+	return nil, errors.New("not on a branch")
+}
+
+func CurrentBranchName(repo *git.Repository) (string, error) {
+	branch, err := CurrentBranch(repo)
+	if err != nil {
+		return "<error>", err
+	} else {
+		return branch.Name, nil
+	}
+}
+
+func AllTagNames() ([]string, error) {
+	output, err := utils.BacktickE("git", "tag")
+	if err != nil {
+		return nil, err
+	}
+
+	output = strings.TrimSpace(output)
+	lines := strings.Split(output, "\n")
+	return lines, nil
 }

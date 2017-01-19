@@ -1,5 +1,4 @@
 #!env ruby
-# vim: fdm=syntax:
 require 'fileutils'
 require 'pathname'
 
@@ -89,8 +88,10 @@ end
 # powerline
 doLink "config/powerline", "~", :as => ".config/powerline"
 
-
 git_config = {
+  gui: {
+    gcwarning: false,
+  },
   pull: {
     rebase: true,
   },

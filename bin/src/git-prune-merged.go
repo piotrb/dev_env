@@ -1,30 +1,37 @@
 package main
 
 import (
-	// "./golib/utils"
-	"./golib/git"
-	// "bufio"
-	// "flag"
 	"fmt"
 	"os"
-	// "regexp"
-	// "strings"
+
+	"./golib/git"
+	"./golib/utils"
 	"github.com/libgit2/git2go"
 )
 
 func handleError(err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
+func gitStatusCount(repo *git.Repository) (int, error) {
+	options := git.StatusOptions{Flags: git.StatusOptIncludeUntracked}
+	status, err := repo.StatusList(&options)
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := status.EntryCount()
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func main() {
-
-	// branches := []string{}
-	// current_branch := ""
-
-	// fmt.Printf("Getting all branches ...\n")
+	candidates := []string{}
 
 	repo, err := gitutil.DiscoverRepo(".")
 	handleError(err)
@@ -32,60 +39,56 @@ func main() {
 	branches, err := gitutil.AllBranches(repo, git.BranchLocal)
 	handleError(err)
 
-	fmt.Printf("branches: %v\n", branches)
-
-	current_branch, err := gitutil.CurrentBranchName(repo)
+	currentBranch, err := gitutil.CurrentBranch(repo)
 	handleError(err)
 
-	fmt.Printf("current_branch: %v\n", current_branch)
-
-	// if current_branch != "master" && current_branch != "develop" {
-	// 	fmt.Fprintf(os.Stderr, "should be ran from master or develop\n")
-	// 	os.Exit(1)
-	// }
+	if currentBranch.Name != "master" && currentBranch.Name != "develop" {
+		fmt.Fprint(os.Stderr, "should be ran from master or develop\n")
+		os.Exit(1)
+	}
 
 	for _, branch := range branches {
-		if branch.Name == "develop" || branch.Name == "master" || branch.Name == current_branch {
-			fmt.Printf("Skipping %v ...\n", branch.Name)
+		if branch.Name == "develop" || branch.Name == "master" || branch.Name == currentBranch.Name {
 			continue
 		}
 
-		fmt.Printf("[%v] ...", branch.Name)
+		fmt.Printf("[%v] ... ", branch.Name)
+		err := utils.RunE("git", "clean", "-fq")
+		if err == nil {
 
+			_, err = utils.BacktickE("git", "merge", "--no-commit", "--no-ff", branch.Name)
+			if err == nil {
+				count, err := gitStatusCount(repo)
+				if err != nil {
+					handleError(err)
+				} else {
+					if count > 0 {
+						fmt.Print("had some extra changes\n")
+					} else {
+						fmt.Print("merged cleanly\n")
+						candidates = append(candidates, branch.Name)
+					}
+				}
+			} else {
+				fmt.Print("merge failed\n")
+			}
+
+			// cleanup
+			if utils.FileExists(".git/MERGE_HEAD") {
+				utils.Run("git", "merge", "--abort")
+			}
+			utils.Run("git", "clean", "-fq")
+		} else {
+			fmt.Print("failed to clean\n")
+			fmt.Printf("%o", err)
+		}
 	}
 
+	if len(candidates) == 0 {
+		fmt.Print("nothing to clean up\n")
+	} else {
+		for _, branch := range candidates {
+			utils.Run("git", "branch", "-D", branch)
+		}
+	}
 }
-
-// candidates = [] of String
-
-// branches.each do |branch|
-//   print "[#{branch}] ... "
-//   begin
-//     system "git clean -fq"
-//     system "git merge --no-commit --no-ff #{branch.inspect} 2>/dev/null 1>/dev/null"
-//     if $?.success?
-//       changed = `git status --porcelain`.rstrip.split("\n").map { |s| s.rstrip }.reject { |s| s == "" }
-//       if changed.empty?
-//         puts "merged cleanly ..."
-//         candidates << branch
-//       else
-//         puts "had some extra changes ..."
-//       end
-//     else
-//       puts "merge failed"
-//     end
-//   ensure
-//     if File.exists?(".git/MERGE_HEAD")
-//       system "git merge --abort"
-//     end
-//     system "git clean -fq"
-//   end
-// end
-
-// if candidates.empty?
-//   puts "nothing to clean up"
-// end
-
-// candidates.each do |branch|
-//   sh "git branch -D #{branch.inspect}"
-// end

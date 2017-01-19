@@ -1,13 +1,14 @@
 package main
 
 import (
-	"./golib/utils"
 	"bufio"
 	"flag"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
+
+	"./golib/utils"
 )
 
 var feature = flag.Bool("f", false, "Create as a Feature branch")
@@ -18,10 +19,10 @@ var sub = flag.Bool("s", false, "Create as a Sub branch")
 func main() {
 	flag.Parse()
 
-	fmt.Printf("feature: %v\n", *feature)
-	fmt.Printf("epic: %v\n", *epic)
-	fmt.Printf("hotfix: %v\n", *hotfix)
-	fmt.Printf("sub: %v\n", *sub)
+	// fmt.Printf("feature: %v\n", *feature)
+	// fmt.Printf("epic: %v\n", *epic)
+	// fmt.Printf("hotfix: %v\n", *hotfix)
+	// fmt.Printf("sub: %v\n", *sub)
 
 	var name = ""
 
@@ -43,10 +44,10 @@ func main() {
 	name = strings.Replace(name, " ", "-", -1)
 
 	if *sub {
-		var current_branch = strings.TrimSpace(utils.Backtick("git", "rev-parse", "--symbolic-full-name", "--abbrev-ref", "HEAD"))
-		var pieces = strings.Split(current_branch, "/")
-		current_branch = pieces[len(pieces)-1]
-		name = fmt.Sprintf("%s-%s", current_branch, name)
+		var currentBranch = strings.TrimSpace(utils.Backtick("git", "rev-parse", "--symbolic-full-name", "--abbrev-ref", "HEAD"))
+		var pieces = strings.Split(currentBranch, "/")
+		currentBranch = pieces[len(pieces)-1]
+		name = fmt.Sprintf("%s-%s", currentBranch, name)
 	}
 
 	if *feature {
