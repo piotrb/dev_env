@@ -69,10 +69,10 @@ au BufNewFile,BufRead *.god set filetype=ruby
 au BufNewFile,BufRead *.rxls set filetype=ruby
 au BufNewFile,BufRead *.es6 set filetype=javascript
 
-syntax on             " Enable syntax highlighting
 filetype on           " Enable filetype detection
 filetype indent on    " Enable filetype-specific indenting
 filetype plugin on    " Enable filetype-specific plugins
+syntax on             " Enable syntax highlighting
 
 au FileType ruby setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab autoindent
 au FileType shell setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab autoindent

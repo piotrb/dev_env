@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"./golib/utils"
+	"../../lib/utils"
 )
 
 func main() {

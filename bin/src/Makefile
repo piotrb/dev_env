@@ -1,30 +1,17 @@
 .SUFFIXES:
 	MAKEFLAGS += -r
 
-CRYSTAL = crystal
-GO = go
-GOLIB_DEPS = $(wildcard golib/**/*.go)
-
 .DEFAULT_GOAL := build
 
-GO_FILES = $(wildcard *.go)
-GO_TARGETS = $(patsubst %.go,../%,$(GO_FILES))
+.PHONY: build clean go install_go
 
-CR_FILES = $(wildcard *.cr)
-CR_TARGETS = $(patsubst %.cr,../%,$(CR_FILES))
+go:
+	${MAKE} -w -C go build
 
-TARGETS = $(CR_TARGETS) $(GO_TARGETS)
+install_go:
+	ln -sfv go/cmd/.bin/* ..
 
-../% : %.go $(GOLIB_DEPS)
-	$(GO) build -o "$@" "$<"
-
-../% : %.cr
-	$(CRYSTAL) build --release "$<" -o "$@"
-
-.PHONY: build clean
-
-build: $(TARGETS)
+build: go install_go
 
 clean:
-	rm -vf $(TARGETS)
-
+	${MAKE} -w -C go clean

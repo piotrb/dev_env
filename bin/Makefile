@@ -3,6 +3,6 @@
 phony: build clean
 
 clean:
-	cd src; $(MAKE) clean
+	$(MAKE) -w -C src clean
 build:
-	cd src; $(MAKE) build
+	$(MAKE) -w -C src build

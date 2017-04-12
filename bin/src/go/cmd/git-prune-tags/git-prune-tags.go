@@ -1,13 +1,11 @@
 package main
 
 import (
-	//"./golib/utils"
-	"./golib/git"
-	//"os"
-	//"github.com/libgit2/git2go"
 	"flag"
 	"fmt"
 	"os"
+
+	"../../lib/git"
 )
 
 var dryRun = flag.Bool("dry-run", false, "Dry Run")

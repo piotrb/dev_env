@@ -1,0 +1,159 @@
+#!env ruby
+
+gem 'ansi'
+gem 'pry'
+
+require 'yaml/store'
+require 'ansi'
+require 'pry'
+
+class App
+  def initialize
+    @store = YAML::Store.new(File.expand_path('~/Work/tmp/failures.yaml'))
+  end
+  
+  def run(args)
+    args = args.dup
+    command = args.shift
+    if respond_to?("cmd_#{command}")
+      send("cmd_#{command}", args)
+    else
+      
+      $stderr.puts "invalid command: #{command.inspect}"
+      usage
+      exit 1
+    end
+  end
+  
+  def cmd_init(args)
+    puts "Enter commands, one per line:"
+    lines = $stdin.each_line.to_a
+    lines.map!(&:strip).reject! { |line| line.nil? || line.empty? }
+    @store.transaction do
+      @store[:lines] = {}
+      lines.each do |line|
+        @store[:lines][line] = :unknown
+      end
+    end
+  end
+  
+  def cmd_status(args)
+    puts "lines:"
+    @store.transaction(true) do
+      lines = @store[:lines]
+      if lines && !lines.empty?
+        lines.each do |line, status|
+          marker = @store[:current] == line ? "-> " : "   "
+          puts "#{marker}#{line} - #{status_color(status.to_s, status)}"
+        end
+      else
+        puts "- none -"
+      end
+    end
+  end
+
+  def cmd_next(args)
+    @store.transaction do
+      if @store[:lines][@store[:current]].nil? || args.first == "reset"
+        @store[:current] = @store[:lines].keys.first
+      else
+        current_index = @store[:lines].keys.index(@store[:current])
+        next_index = current_index + 1
+        @store[:current] = @store[:lines].keys[next_index]
+      end
+      puts "Setting current line to: #{@store[:current]}"
+    end
+  end
+  
+  def cmd_run(args)
+    @store.transaction do
+      if @store[:lines][@store[:current]]
+        run_line @store[:current]
+      else
+        fail "no current line set"
+      end
+    end
+  end
+  
+  def cmd_run_all(args)
+    case args.first
+    when "pending"
+      filter = -> (status) { [:error, :unknown].include?(status) }
+    else
+      filter = -> (status) { true }
+    end
+    @store.transaction do
+      @store[:lines].each do |line, status|
+        if filter.call(status)
+          run_line line
+        end
+      end
+    end
+  end
+  
+  private
+
+  def run_line(line)
+    puts "running: -> #{line}"
+    with_clean_env do
+      system line
+    end
+    if $?.success?
+      @store[:lines][line] = :ok
+    else
+      @store[:lines][line] = :error
+    end
+  end
+
+  def with_clean_env
+    original_env = ENV.to_hash
+    keys_to_remove = [
+      /rbenv/i,
+      /ruby/i,
+    ].map { |pattern| ENV.keys.grep(pattern) }.flatten
+    puts "  Removing: #{keys_to_remove.join(', ')}"
+    keys_to_remove.each do |key|
+      ENV.delete(key)
+    end
+    yield
+  ensure
+    extra_keys = ENV.keys - original_env.keys
+    ENV.update(original_env)
+    extra_keys.each do |key|
+      ENV.delete(key)
+    end
+  end
+
+  def usage
+    [
+      "Usage: failures {command}",
+      "",
+      "Commands:",
+      "  init",
+      "  status",
+      "  next [reset]",
+      "  run",
+    ]
+  end
+
+  def fail(message, status = 1)
+    $stderr.puts message
+    exit status
+  end
+  
+  def status_color(text, status)
+    color = case status
+    when :unknown
+      :yellow
+    when :ok
+      :green
+    when :error
+      :red
+    else
+      :reset
+    end
+    text.ansi(color)
+  end
+end
+
+App.new.run(ARGV)

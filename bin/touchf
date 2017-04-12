@@ -1,0 +1,4 @@
+file="$1"
+dir=`dirname "$file"`
+mkdir -p "$dir"
+touch "$file"

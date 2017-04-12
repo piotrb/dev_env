@@ -7,6 +7,8 @@ setopt ALL_EXPORT
 unsetopt BG_NICE AUTO_PARAM_SLASH MENU_COMPLETE AUTO_CD AUTO_RESUME GLOB_DOTS CORRECT CORRECT_ALL CDABLE_VARS AUTO_MENU
 unsetopt REC_EXACT
 
+unsetopt nomatch
+
 setopt MENU_COMPLETE
 
 # cd not select parent dir.

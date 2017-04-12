@@ -8,12 +8,13 @@ import (
 	"regexp"
 	"strings"
 
-	"./golib/utils"
+	"../../lib/utils"
 )
 
 var feature = flag.Bool("f", false, "Create as a Feature branch")
 var epic = flag.Bool("e", false, "Create as an Epic branch")
 var hotfix = flag.Bool("h", false, "Create as a Hotfix branch")
+var techdebt = flag.Bool("t", false, "Create as a Tech Debt branch")
 var sub = flag.Bool("s", false, "Create as a Sub branch")
 
 func main() {
@@ -60,6 +61,10 @@ func main() {
 
 	if *hotfix {
 		name = fmt.Sprintf("hotfix/%s", name)
+	}
+
+	if *techdebt {
+		name = fmt.Sprintf("tech-debt/%s", name)
 	}
 
 	fmt.Printf("name: %v\n", name)
