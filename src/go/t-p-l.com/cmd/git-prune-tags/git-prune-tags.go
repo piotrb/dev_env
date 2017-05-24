@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"../../lib/git"
+	"t-p-l.com/lib/git"
 )
 
 var dryRun = flag.Bool("dry-run", false, "Dry Run")

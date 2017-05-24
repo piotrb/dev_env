@@ -1,10 +1,10 @@
 package gitutil
 
 import (
-	"../utils"
 	"errors"
 	"gopkg.in/libgit2/git2go.v25"
 	"strings"
+	"t-p-l.com/lib/utils"
 )
 
 type BranchInfo struct {

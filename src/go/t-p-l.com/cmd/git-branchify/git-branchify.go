@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"../../lib/utils"
+	"t-p-l.com/lib/utils"
 )
 
 var feature = flag.Bool("f", false, "Create as a Feature branch")

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"../../lib/bundle"
-	"../../lib/utils"
+	"t-p-l.com/lib/bundle"
+	"t-p-l.com/lib/utils"
 )
 
 func main() {

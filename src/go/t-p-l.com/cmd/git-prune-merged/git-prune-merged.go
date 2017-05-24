@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"../../lib/git"
-	"../../lib/utils"
+	"t-p-l.com/lib/git"
+	"t-p-l.com/lib/utils"
 
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -33,8 +33,6 @@ func gitStatusCount(repo *git.Repository) (int, error) {
 
 func main() {
 	candidates := []string{}
-
-	fmt.Print("1")
 
 	repo, err := gitutil.DiscoverRepo(".")
 	handleError(err)

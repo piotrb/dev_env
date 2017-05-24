@@ -18,7 +18,7 @@ func Backtick(parts ...string) string {
 
 func BacktickE(parts ...string) (string, error) {
 	var cmd = command_prep(parts...)
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return string(out[:]), err
 	}

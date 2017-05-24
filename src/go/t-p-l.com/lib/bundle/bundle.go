@@ -1,11 +1,11 @@
 package bundle
 
 import (
-	"../utils"
 	"errors"
 	"fmt"
 	"regexp"
 	"strings"
+	"t-p-l.com/lib/utils"
 )
 
 type BundleItem struct {
@@ -17,7 +17,7 @@ func BundleListE() ([]BundleItem, error) {
 	var result = []BundleItem{}
 	var out, err = utils.BacktickE("bundle", "list")
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Failed getting bundle list: %s\n", out))
+		return nil, errors.New(fmt.Sprintf("Failed getting bundle list: %s %s\n", out, err))
 	}
 	var lines = strings.Split(out, "\n")
 
