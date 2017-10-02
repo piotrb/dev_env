@@ -1,0 +1,4 @@
+#!env ruby
+from, to = ARGV
+
+system "git log --oneline --first-parent #{from}..#{to}"

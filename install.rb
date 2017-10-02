@@ -80,13 +80,14 @@ doDir "~/.vim/bundle"
 doClone 'https://github.com/gmarik/Vundle.vim.git', '~/.vim/bundle/Vundle.vim'
 doLink "vim/bundle.vim", "~/.vim", as: 'bundle.vim'
 
-powerline_lib = "~/.local/lib/python2.7/site-packages/powerline/"
-unless File.exist?(File.expand_path(powerline_lib))
-  doRun "pip install powerline-status --user --upgrade"
-end
+#powerline_lib = "~/.local/lib/python2.7/site-packages/powerline/"
+#unless File.exist?(File.expand_path(powerline_lib))
+  doRun "pip install powerline-shell --user --upgrade"
+#end
 
 # powerline
-doLink "config/powerline", "~", :as => ".config/powerline"
+#doLink "config/powerline", "~", :as => ".config/powerline"
+doLink ".powerline-shell.json", "~"
 
 git_config = {
   gui: {

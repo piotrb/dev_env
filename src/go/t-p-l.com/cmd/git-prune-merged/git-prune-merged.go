@@ -7,7 +7,7 @@ import (
 	"t-p-l.com/lib/git"
 	"t-p-l.com/lib/utils"
 
-	"gopkg.in/libgit2/git2go.v25"
+	"gopkg.in/libgit2/git2go.v26"
 )
 
 func handleError(err error) {
@@ -49,7 +49,7 @@ func main() {
 	}
 
 	for _, branch := range branches {
-		if branch.Name == "develop" || branch.Name == "master" || branch.Name == currentBranch.Name {
+		if branch.Name == "develop" || branch.Name == "master" || branch.Name == "staging" || branch.Name == currentBranch.Name {
 			continue
 		}
 

@@ -1,22 +1,22 @@
 module_path=($module_path /usr/local/lib/zpython)
 
-if [ -e ~/.python/lib/Python2.7/site-packages/powerline ]; then
-  export POWERLINE_BASE=$HOME/.python/lib/Python2.7/site-packages/powerline
-  export PATH=$HOME/.python/bin:$PATH
-fi
+export PATH=$HOME/Library/Python/2.7/bin:$PATH
+export PATH=$HOME/.python/bin:$PATH
+export PATH=$HOME/.local/bin:$PATH
 
-# linux
-if [ -e ~/.local/lib/python2.7/site-packages/powerline ]; then
-  export POWERLINE_BASE=$HOME/.local/lib/python2.7/site-packages/powerline
-  export PATH=$HOME/.local/bin:$PATH
-fi
+function powerline_precmd() {
+    PS1="$(powerline-shell --shell zsh $?)"
+}
 
-# linux shared
-if [ -e /usr/local/lib/python2.7/dist-packages/powerline ]; then
-  export POWERLINE_BASE=/usr/local/lib/python2.7/dist-packages/powerline
-fi
+function install_powerline_precmd() {
+  for s in "${precmd_functions[@]}"; do
+    if [ "$s" = "powerline_precmd" ]; then
+      return
+    fi
+  done
+  precmd_functions+=(powerline_precmd)
+}
 
-if [ -e $POWERLINE_BASE ]; then
-  . $POWERLINE_BASE/bindings/zsh/powerline.zsh
-  powerline-daemon -q
+if [ `command -v powerline-shell` ]; then
+  install_powerline_precmd
 fi

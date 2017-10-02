@@ -1,4 +1,8 @@
 docker run \
   -v /var/run/docker.sock:/var/run/docker.sock:rw \
   -v /var/lib/docker:/var/lib/docker:rw \
+  -e "LOOP=false" \
+  -e "KEEP_IMAGES=server_bundle,server_db-data" \
+  -e "DELAY_TIME=0" \
+  -e "CLEAN_PERIOD=0" \
   meltwater/docker-cleanup:latest

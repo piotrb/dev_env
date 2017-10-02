@@ -10,3 +10,4 @@ ulimit -n 2048
 
 alias fixtty="stty sane"
 alias ag="echo use pt instead"
+alias kraken="open -a GitKraken"

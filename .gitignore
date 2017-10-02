@@ -45,3 +45,4 @@ railways.cache
 .deps.yml
 
 .profile.d/github.sh
+.vagrant/*
