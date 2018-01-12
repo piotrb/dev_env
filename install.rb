@@ -40,7 +40,7 @@ end
 def doClone(repo, path)
   path = File.expand_path(path)
   unless File.exist?(path)
-    doRun("git clone #{repo.inspect} #{path.inspect}")
+    doRun("git clone --recursive #{repo.inspect} #{path.inspect}")
   end
 end
 
@@ -51,6 +51,12 @@ def doGetHttp(url, path)
   end
 end
 
+def doShell(shell)
+  unless ENV['SHELL'] == shell
+    doRun "chsh -s #{shell}"
+  end
+end
+
 def flat_hash(hash, k = [])
   return {k => hash} unless hash.is_a?(Hash)
   hash.inject({}){ |h, v| h.merge! flat_hash(v[-1], k + [v[0]]) }
@@ -58,10 +64,9 @@ end
 
 doRun "git submodule init && git submodule sync && git submodule update"
 
-doClone "git://github.com/robbyrussell/oh-my-zsh.git", "~/.oh-my-zsh"
+doClone "https://github.com/sorin-ionescu/prezto.git", "~/.zprezto"
 
 doLink ".vimrc", "~"
-doLink ".zshrc", "~"
 doLink ".tmux.conf", "~"
 doLink ".bash_profile", "~"
 doLink ".bashrc", "~"
@@ -73,21 +78,23 @@ doLink ".powconfig", "~"
 doLink ".gemrc", "~"
 doLink ".tigrc", "~"
 doLink "bin", "~"
-doDir "~/.config"
+
+# Zsh Configs
+doLink ".zshrc", "~"
+doLink "~/.zprezto/runcoms/zlogin", "~", as: '.zlogin'
+doLink "~/.zprezto/runcoms/zlogout", "~", as: '.zlogout'
+# doLink "~/.zprezto/runcoms/zpreztorc", "~"
+doLink "~/.zprezto/runcoms/zprofile", "~", as: '.zprofile'
+doLink "~/.zprezto/runcoms/zshenv", "~", as: '.zshenv'
+# doLink "~/.zprezto/runcoms/zshrc", "~"
+doLink "shell/zprezto/zpreztorc", "~", as: '.zpreztorc'
+
+doShell "/bin/zsh"
 
 # vim
 doDir "~/.vim/bundle"
 doClone 'https://github.com/gmarik/Vundle.vim.git', '~/.vim/bundle/Vundle.vim'
 doLink "vim/bundle.vim", "~/.vim", as: 'bundle.vim'
-
-#powerline_lib = "~/.local/lib/python2.7/site-packages/powerline/"
-#unless File.exist?(File.expand_path(powerline_lib))
-  doRun "pip install powerline-shell --user --upgrade"
-#end
-
-# powerline
-#doLink "config/powerline", "~", :as => ".config/powerline"
-doLink ".powerline-shell.json", "~"
 
 git_config = {
   gui: {
