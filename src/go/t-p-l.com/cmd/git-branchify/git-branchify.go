@@ -16,6 +16,7 @@ var epic = flag.Bool("e", false, "Create as an Epic branch")
 var hotfix = flag.Bool("h", false, "Create as a Hotfix branch")
 var techdebt = flag.Bool("t", false, "Create as a Tech Debt branch")
 var sub = flag.Bool("s", false, "Create as a Sub branch")
+var jira = flag.String("j", "", "Tag with Jira ticket/s")
 
 func main() {
 	flag.Parse()
@@ -65,6 +66,10 @@ func main() {
 
 	if *techdebt {
 		name = fmt.Sprintf("tech-debt/%s", name)
+	}
+
+	if *jira != "" {
+		name = fmt.Sprintf("%s-%s", *jira, name)
 	}
 
 	fmt.Printf("name: %v\n", name)

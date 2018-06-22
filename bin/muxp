@@ -4,7 +4,7 @@ require 'shellwords'
 
 if File.exist?(".env.muxp")
   env = YAML.load_file(".env.muxp")
-  env.each do |k,v|
+  env.each do |k, v|
     ENV[k] = v.to_s
   end
 end
@@ -67,4 +67,4 @@ tmux %{select-window -t "#{project}:1"}
 
 puts "\e]0;tmux: #{project}\007"
 
-tmux %{attach -t "#{project}"}, mode: :exec
+tmux %{-CC attach -t "#{project}"} #, mode: :exec

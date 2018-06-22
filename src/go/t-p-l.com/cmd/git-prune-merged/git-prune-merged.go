@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -9,6 +10,8 @@ import (
 
 	"gopkg.in/libgit2/git2go.v26"
 )
+
+var force = flag.Bool("f", false, "Force cleanup even based on irregular branches")
 
 func handleError(err error) {
 	if err != nil {
@@ -32,6 +35,7 @@ func gitStatusCount(repo *git.Repository) (int, error) {
 }
 
 func main() {
+	flag.Parse()
 	candidates := []string{}
 
 	repo, err := gitutil.DiscoverRepo(".")
@@ -43,7 +47,7 @@ func main() {
 	currentBranch, err := gitutil.CurrentBranch(repo)
 	handleError(err)
 
-	if currentBranch.Name != "master" && currentBranch.Name != "develop" {
+	if currentBranch.Name != "master" && currentBranch.Name != "develop" && !*force {
 		fmt.Fprint(os.Stderr, "should be ran from master or develop\n")
 		os.Exit(1)
 	}

@@ -46,3 +46,5 @@ railways.cache
 
 .profile.d/github.sh
 .vagrant/*
+
+.vscode

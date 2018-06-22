@@ -10,4 +10,8 @@ ulimit -n 2048
 
 alias fixtty="stty sane"
 alias ag="echo use pt instead"
-alias kraken="open -a GitKraken"
+#alias kraken="open -a GitKraken"
+
+alias mine="open -a RubyMine"
+alias ws="open -a WebStorm"
+

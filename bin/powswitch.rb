@@ -4,14 +4,23 @@ require 'fileutils'
 
 command, = ARGV
 
-config = YAML.load_file(".powswitch")
+global_config_file = File.expand_path("~/.powswitch")
+global_config = File.exist?(global_config_file) ? YAML.load_file(global_config_file) : {}
+
+config = global_config.merge(YAML.load_file(".powswitch"))
+engine = config['engine'] || 'pow'
 
 def run(cmd)
   puts "$ #{cmd}"
   system(cmd) || exit($?.exitstatus)
 end
 
-powdir = File.expand_path('~/.pow')
+powdir = case engine
+         when 'pow' then File.expand_path('~/.pow')
+         when 'puma-dev' then File.expand_path('~/.puma-dev')
+         else
+           raise "unknown engine: #{engine.inspect}"
+         end
 
 command ||= ""
 
@@ -44,7 +53,7 @@ when 'run'
   system "foreman run web"
 when 'info'
   puts "config file help:"
-  puts "  - links: Array<String> -- names of links to put in pow directory"
+  puts "  - links: Array<String> -- names of links to put in #{engine} directory"
   puts "  - port: Fixnum"
 else
   $stderr.puts "invalid command: #{command.inspect}, valid: link, proxy, run"
