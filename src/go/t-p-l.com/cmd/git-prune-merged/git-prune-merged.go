@@ -8,7 +8,7 @@ import (
 	"t-p-l.com/lib/git"
 	"t-p-l.com/lib/utils"
 
-	"gopkg.in/libgit2/git2go.v26"
+	"gopkg.in/libgit2/git2go.v27"
 )
 
 var force = flag.Bool("f", false, "Force cleanup even based on irregular branches")

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+# Install Homebrew itself
+#/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 brew tap phinze/cask
 brew install brew-cask
@@ -8,4 +9,7 @@ brew install brew-cask
 brew tap jimbojsb/launchrocket
 brew cask install launchrocket
 
-brew install mysql ctags rbenv ruby-build vim git rbenv-gem-rehash scala wget postgresql rbenv-gemset the_silver_searcher memcached tmux
+brew install the_platinum_searcher libgit2 go ctags rbenv ruby-build vim git wget rbenv-gemset tmux
+
+# Some additional languages and tools
+#brew install mysql scala postgresql memcached
