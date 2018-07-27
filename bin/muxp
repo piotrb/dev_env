@@ -67,4 +67,4 @@ tmux %{select-window -t "#{project}:1"}
 
 puts "\e]0;tmux: #{project}\007"
 
-tmux %{-CC attach -t "#{project}"} #, mode: :exec
+tmux %{attach -t "#{project}"} #, mode: :exec

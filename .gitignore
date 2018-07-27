@@ -48,3 +48,10 @@ railways.cache
 .vagrant/*
 
 .vscode
+
+.byebug_history
+
+/bisect.yml
+/tests.txt
+/batch_log.log
+.env

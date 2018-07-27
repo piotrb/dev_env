@@ -1,0 +1,17 @@
+#!env ruby
+
+# How to use:
+# Make a file at the root of the project called: bisect.yml
+
+# With:
+#
+# command: bundle exec rspec --seed 65524
+# all_tests_from: tests.txt
+# failing:
+#   - spec/lib/copy_charts_to_company_spec.rb
+# skip: []
+
+# put all the tests in the batch in tests.txt and set the seed accordingly
+
+require_relative '../src/ruby/init'
+execute_command(:bisect_tests, ARGV)

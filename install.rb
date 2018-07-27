@@ -64,8 +64,6 @@ end
 
 doRun "git submodule init && git submodule sync && git submodule update"
 
-doClone "https://github.com/sorin-ionescu/prezto.git", "~/.zprezto"
-
 doLink ".vimrc", "~"
 doLink ".tmux.conf", "~"
 doLink ".bash_profile", "~"
@@ -80,14 +78,10 @@ doLink ".tigrc", "~"
 doLink "bin", "~"
 
 # Zsh Configs
+doDir "~/.zsh"
+doRun "curl -L git.io/antigen > ~/.zsh/antigen.zsh"
+
 doLink ".zshrc", "~"
-doLink "~/.zprezto/runcoms/zlogin", "~", as: '.zlogin'
-doLink "~/.zprezto/runcoms/zlogout", "~", as: '.zlogout'
-# doLink "~/.zprezto/runcoms/zpreztorc", "~"
-doLink "~/.zprezto/runcoms/zprofile", "~", as: '.zprofile'
-doLink "~/.zprezto/runcoms/zshenv", "~", as: '.zshenv'
-# doLink "~/.zprezto/runcoms/zshrc", "~"
-doLink "shell/zprezto/zpreztorc", "~", as: '.zpreztorc'
 
 doShell "/bin/zsh"
 

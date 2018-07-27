@@ -1,0 +1,129 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'open3'
+
+class IOProxy
+  def initialize(io, log, name)
+    @io = io
+    @log = log
+    @name = name
+  end
+
+  def write(string)
+    @io.write(string)
+    @log.write("[#{@name} - write]: #{string}\n")
+  end
+
+  def <<(string)
+    @io << string
+    @log.write("[#{@name} - <<]: #{string}\n")
+  end
+
+  def puts(string)
+    @io.puts(string)
+    @log.write("[#{@name} - puts]: #{string}\n")
+  end
+
+  def close
+    @io.close
+    @log.write("[#{@name} - close]\n")
+  end
+end
+
+File.open(File.expand_path("~/kb-gpg.log"), "w") do |fh|
+  p_out = IOProxy.new(STDOUT, fh, "stdout")
+  p_err = IOProxy.new(STDERR, fh, "stderr")
+
+  # fh.write([:argv, ARGV].inspect + "\n")
+
+  stdin = STDIN.read
+
+  # fh.write([:stdin].inspect + "\n")
+  # fh.write(stdin)
+
+  begin
+
+    options = {}
+    original_args = ARGV.dup
+    new_args = OptionParser.new do |opts|
+      # opts.banner = "Usage: example.rb [options]"
+
+      opts.on("--status-fd=n", "Status FD") do |v|
+        options[:status_fd] = v
+      end
+
+      opts.on("-b", "--detach-sign", "make a detached signature") do |v|
+        options[:detached_sign] = v
+      end
+
+      opts.on("-s", "--sign", "make a signature") do |v|
+        options[:sign] = v
+      end
+
+      opts.on("-a", "--armor", "create ascii armored output") do |v|
+        options[:armor] = v
+      end
+
+      opts.on("-u", "--local-user ID", "use USER-ID to sign or decrypt") do |v|
+        options[:local_user] = v
+      end
+
+      opts.on("--keyid-format=F") do |v|
+        options[:keyid_format] = v
+      end
+
+      opts.on("--verify") do |v|
+        options[:verify] = v
+      end
+    end.parse!
+
+    # fh.write([:new_args, new_args].inspect + "\n")
+    # fh.write([:options, options].inspect + "\n")
+
+    if options[:sign]
+      cmdline = ["keybase pgp sign"]
+      cmdline << "-d" if options[:detached_sign]
+      cmdline << "-b" unless options[:armor]
+
+      p_err.puts "[GNUPG:] BEGIN_SIGNING H10"
+
+      fh.write([:cmdline, cmdline].inspect + "\n")
+
+      Open3.popen3(cmdline.join(' ')) do |i, o, e, t|
+        i.write(stdin)
+        i.close()
+
+        out = o.read
+        fh.write([:stdout].inspect + "\n")
+        fh.write out
+        p_out.write out
+
+        err = e.read
+        fh.write([:stderr, err].inspect + "\n")
+        p_err.write err
+      end
+
+      p_err.puts "[GNUPG:] SIG_CREATED D 1 10 00 xx xx"
+    end
+
+    if options[:verify]
+      cmdline = ["keybase pgp verify"]
+      cmdline << "-d #{new_args[0]}"
+
+      Open3.popen3(cmdline.join(' ')) do |i, o, e, t|
+        i.write(stdin)
+        i.close()
+
+        p_out.write o.read
+        p_err.write e.read
+      end
+
+      p_out.puts "[GNUPG:] NEWSIG"
+      p_out.puts "[GNUPG:] GOODSIG xx"
+    end
+  rescue Exception => e
+    fh.write([:exception, e].inspect + "\n")
+    fh.write(e.backtrace.join("\n"))
+    exit 1
+  end
+end

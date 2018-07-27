@@ -16,7 +16,3 @@ alias pry="bundle_wrapper pry"
 alias teaspoon="bundle_wrapper teaspoon -d phantomjs -q --format=tap_y | tapout progress"
 
 export SPEC_OPTS=--color
-
-export PATH=~/.rbenv/bin:$PATH
-
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
