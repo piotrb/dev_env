@@ -43,6 +43,7 @@ railways.cache
 
 .powswitch
 .deps.yml
+.unstable-master.yml
 
 .profile.d/github.sh
 .vagrant/*
@@ -54,4 +55,3 @@ railways.cache
 /bisect.yml
 /tests.txt
 /batch_log.log
-.env

@@ -103,6 +103,7 @@ git_config = {
   core: {
     mergeoptions: '--no-edit',
     excludesfile: File.expand_path("~/.gitignore"),
+    pager: 'less -FX',
   },
   push: {
     default: "current",
@@ -114,21 +115,17 @@ git_config = {
     compactionHeuristic: 1,
   },
   pager: {
-    log: 'diff-highlight | less',
-    show: 'diff-highlight | less',
-    diff: 'diff-highlight | less',
+    log: 'diff-highlight | less -FX',
+    show: 'diff-highlight | less -FX',
+    diff: 'diff-highlight | less -FX',
   },
   alias: {
-    #ct: "status",
-    #ci: "commit",
-    #br: "branch",
-    #co: "checkout",
-    #df: "diff",
-    #lp: "log -p",
-    #cp: "cherry-pick",
     lg: "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)%Creset' --abbrev-commit",
     pf: "push --force-with-lease",
   },
+  rebase: {
+    instructionFormat: "[%an] - %s",
+  }
 }
 
 flat_hash(git_config).each do |k,v|

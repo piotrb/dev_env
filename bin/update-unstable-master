@@ -1,0 +1,19 @@
+#!env ruby
+
+require 'yaml'
+
+config = YAML.load_file('.unstable-master.yml')
+
+def sh(cmd)
+  puts "$ #{cmd}"
+  system(cmd) || raise("failed")
+end
+
+sh "git branch -D master2" rescue nil
+sh "git checkout master"
+sh "git pull"
+sh "git checkout -b master2"
+
+config['branches'].each do |branch|
+  sh "git merge #{branch.inspect} --no-edit"
+end

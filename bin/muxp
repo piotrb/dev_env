@@ -48,23 +48,31 @@ end
 
 puts "Starting new session ..."
 tmux %{new-session -s "#{project}" -n "#{project} Main" -d}
+tmux %{send-keys "setpane shell" Enter}
 
-tmux %{set-window-option remain-on-exit on}
+# tmux %{set-window-option remain-on-exit on}
 tmux %{set mouse on}
 
 if tasks.length > 0
   keys = tasks.keys
   first_key = keys.pop
-  tmux %{split-window -v -p 30 -t "#{project}:1" #{tasks[first_key].inspect}}
+  tmux %{split-window -v -p 30 -t "#{project}:1"}
+  tmux %{send-keys "setpane #{first_key}" Enter}
+  tmux %{send-keys #{tasks[first_key].inspect} Enter}
   keys.each do |key|
-    tmux %{split-window -h -t "#{project}:1" #{tasks[key].inspect}}
+    tmux %{split-window -h -t "#{project}:1"}
+    tmux %{send-keys "setpane #{key}" Enter}
+    tmux %{send-keys #{tasks[key].inspect} Enter}
   end
 end
 
-tmux %{new-window -t "#{project}:2" -n "Log" tail -n 0 -f log/development.log}
+tmux %{new-window -t "#{project}:2" -n "Log"}
+tmux %{send-keys "setpane Log" Enter}
+tmux %{send-keys "tail -n 0 -f log/development.log" Enter}
+
 
 tmux %{select-window -t "#{project}:1"}
 
 puts "\e]0;tmux: #{project}\007"
 
-tmux %{attach -t "#{project}"} #, mode: :exec
+tmux %{attach -t "#{project}"}#, mode: :exec
