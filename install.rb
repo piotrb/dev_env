@@ -76,6 +76,7 @@ doLink ".powconfig", "~"
 doLink ".gemrc", "~"
 doLink ".tigrc", "~"
 doLink "bin", "~"
+doLink ".antigenrc", "~"
 
 # Zsh Configs
 doDir "~/.zsh"
