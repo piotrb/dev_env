@@ -81,7 +81,7 @@ doLink ".antigenrc", "~"
 
 # Zsh Configs
 doDir "~/.zsh"
-doRun "curl -L git.io/antigen > ~/.zsh/antigen.zsh"
+doRun "curl -L git.io/antigen-nightly > ~/.zsh/antigen.zsh"
 
 doLink ".zshrc", "~"
 
