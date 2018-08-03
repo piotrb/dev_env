@@ -6,5 +6,4 @@ export PATH="$HOME/bin:$PATH:/usr/local/bin:/usr/local/sbin"
 ulimit -n 2048
 
 alias fixtty="stty sane"
-alias ag="echo use pt instead"
 
