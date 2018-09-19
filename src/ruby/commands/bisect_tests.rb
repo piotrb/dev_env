@@ -14,24 +14,27 @@ module Commands
         setup_interrupt
 
         cmd_base = config['command']
+        use_docker = config['docker']
+
+        init_docker if use_docker
 
         results = []
 
         failing.each do |failing_file|
           matching_batches = []
 
-          with_docker_compose do
+          with_docker_compose(use_docker: use_docker) do
 
             puts "Processing failing file: #{failing_file} ..."
 
             puts "Running it on its own to be sure ..."
-            if execute_batch(cmd_base, [], failing_file) == :bad
+            if execute_batch(cmd_base, [], failing_file, use_docker: use_docker) == :bad
               result = "THE FILE ITSELF!"
             else
               puts "Running it as a whole batch ..."
-              if execute_batch(cmd_base, passing, failing_file) == :bad
+              if execute_batch(cmd_base, passing, failing_file, use_docker: use_docker) == :bad
                 result = in_bsearch_batches(passing, matching_batches: matching_batches) do |batch|
-                  execute_batch(cmd_base, batch, failing_file)
+                  execute_batch(cmd_base, batch, failing_file, use_docker: use_docker)
                 end
               else
                 result = "NO FILES, the whole batch passes!"
@@ -55,6 +58,10 @@ module Commands
 
       def config
         @config ||= YAML.load_file("bisect.yml")
+      end
+
+      def init_docker
+        run_cmd "docker-compose build"
       end
 
       def setup_interrupt
@@ -144,19 +151,29 @@ module Commands
         raise "failed: #{$?.exitstatus}" unless $?.success?
       end
 
-      def with_docker_compose
-        @batch_name = "#{File.basename(Dir.getwd)}-#{Process.pid}"
-        run_cmd to_docker_cmd(config['init_cmd'])
-        yield
-      ensure
-        run_cmd "docker-compose -p #{@batch_name.inspect} down -v"
+      def with_docker_compose(use_docker:)
+        if use_docker
+          begin
+            @batch_name = "#{File.basename(Dir.getwd)}-#{Process.pid}"
+            run_cmd to_docker_cmd(config['init_cmd'])
+            yield
+          ensure
+            run_cmd "docker-compose -p #{@batch_name.inspect} down -v"
+          end
+        else
+          yield
+        end
       end
 
-      def to_docker_cmd(cmd)
-        "docker-compose -p #{@batch_name.inspect} run app #{cmd}"
+      def to_docker_cmd(cmd, use_docker: false)
+        if use_docker
+          "docker-compose -p #{@batch_name.inspect} run app #{cmd}"
+        else
+          cmd
+        end
       end
 
-      def execute_batch(cmd_base, batch, failing_file)
+      def execute_batch(cmd_base, batch, failing_file, use_docker: false)
         cmd = to_docker_cmd("#{cmd_base} #{(batch + [failing_file]).map(&:inspect).join(' ')}")
         puts ansi("[running batch with #{batch.length} additional files]", :cyan)
         File.open('batch_log.log', "w+") do |fh|

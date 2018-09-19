@@ -24,6 +24,10 @@ powdir = case engine
 
 command ||= ""
 
+default_name = File.basename(Dir.getwd)
+
+config['links'] ||= [default_name]
+
 case command.downcase
 when 'link'
   config['links'].each do |link|

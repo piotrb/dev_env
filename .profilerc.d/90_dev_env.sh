@@ -7,3 +7,5 @@ ulimit -n 2048
 
 alias fixtty="stty sane"
 
+alias ws="open -a WebStorm.app"
+alias mine="open -a RubyMine.app"

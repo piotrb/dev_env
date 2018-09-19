@@ -55,3 +55,6 @@ railways.cache
 /bisect.yml
 /tests.txt
 /batch_log.log
+
+# Temporary stuff
+public/attachments
