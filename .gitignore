@@ -58,3 +58,7 @@ railways.cache
 
 # Temporary stuff
 public/attachments
+.env.muxp
+
+tmux-client-*.log
+tmux-server-*.log

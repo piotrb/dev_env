@@ -3,14 +3,22 @@ require 'yaml'
 require 'shellwords'
 
 if File.exist?(".env.muxp")
-  env = YAML.load_file(".env.muxp")
-  env.each do |k, v|
-    ENV[k] = v.to_s
+  File.open(".env.muxp") do |fh|
+    fh.each_line do |line|
+      unless line.strip.empty? || line.strip =~ /^#/
+        k, v = line.rstrip.split("=", 2)
+        ENV[k] = v
+      end
+    end
   end
 end
 
 ignored_tasks = %w(web)
 ignored_tasks = [] if ENV['WEB']
+
+if ENV['MUXP_IGNORE']
+  ignored_tasks += ENV['MUXP_IGNORE'].split(",")
+end
 
 project = File.basename(Dir.getwd)
 tasks = YAML.load_file("Procfile")
@@ -70,9 +78,14 @@ tmux %{new-window -t "#{project}:2" -n "Log"}
 tmux %{send-keys "setpane Log" Enter}
 tmux %{send-keys "tail -n 0 -f log/development.log" Enter}
 
-
 tmux %{select-window -t "#{project}:1"}
 
 puts "\e]0;tmux: #{project}\007"
 
-tmux %{attach -t "#{project}"}#, mode: :exec
+if ENV['MUXP_CC_MODE']
+  extra = "-CC"
+else
+  extra = ""
+end
+
+tmux %{#{extra} attach -t "#{project}"}#, mode: :exec

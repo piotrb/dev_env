@@ -66,6 +66,7 @@ doRun "git submodule init && git submodule sync && git submodule update"
 
 doLink ".vimrc", "~"
 doLink ".tmux.conf", "~"
+doLink ".tmux.mac.conf", "~"
 doLink ".bash_profile", "~"
 doLink ".bashrc", "~"
 doLink ".gitignore", "~"
