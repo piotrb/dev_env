@@ -101,6 +101,7 @@ git_config = {
   },
   fetch: {
     prune: true,
+    pruneTags: true,
   },
   core: {
     mergeoptions: '--no-edit',
@@ -109,6 +110,7 @@ git_config = {
   },
   push: {
     default: "current",
+    followTags: true,
   },
   status: {
     showUntrackedFiles: "all",
