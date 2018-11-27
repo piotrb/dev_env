@@ -1,6 +1,7 @@
-#!/usr/bin/ruby
+#!env ruby
 require 'yaml'
 require 'shellwords'
+require 'active_support/all'
 
 if File.exist?(".env.muxp")
   File.open(".env.muxp") do |fh|
@@ -21,10 +22,23 @@ if ENV['MUXP_IGNORE']
 end
 
 project = File.basename(Dir.getwd)
-tasks = YAML.load_file("Procfile")
-ignored_tasks.each do |task_name|
-  tasks.delete(task_name)
+
+def load_tasks
+  if File.exist?("Procfile")
+    YAML.load_file("Procfile").map { |k,v|
+      {
+        name: k,
+        cwd: Dir.getwd,
+        command: v,
+      }
+    }
+  else
+    []
+  end
 end
+
+tasks = load_tasks
+tasks.reject! { |t| t[:name].in?(ignored_tasks) }
 
 def session_running?(project)
   system("tmux has-session -t #{project.inspect} 2>/dev/null")
@@ -49,6 +63,14 @@ def tmux(cmd, raise_on_error: true, mode: :system)
   end
 end
 
+def env_for_task(name)
+  ENV.keys.grep(/^MUXP_#{name}_/).each do |key|
+    dst_key = key.gsub(/^MUXP_#{name}_/, '')
+    value = ENV[key]
+    tmux %{send-keys "export #{dst_key}=#{value}" Enter}
+  end
+end
+
 if session_running?(project)
   puts "Killing existing session ..."
   tmux(%{kill-session -t "#{project}"})
@@ -57,28 +79,36 @@ end
 puts "Starting new session ..."
 tmux %{new-session -s "#{project}" -n "#{project} Main" -d}
 tmux %{send-keys "setpane shell" Enter}
+tmux %{send-keys "cd / && cd #{Dir.getwd.inspect}" Enter}
 
 # tmux %{set-window-option remain-on-exit on}
 tmux %{set mouse on}
 
 if tasks.length > 0
-  keys = tasks.keys
-  first_key = keys.pop
+  task = tasks.pop
+  # keys = tasks.keys
+  # first_key = keys.pop
   tmux %{split-window -v -p 30 -t "#{project}:1"}
-  tmux %{send-keys "setpane #{first_key}" Enter}
-  tmux %{send-keys #{tasks[first_key].inspect} Enter}
-  keys.each do |key|
+  tmux %{send-keys "setpane #{task[:name].inspect}" Enter}
+  env_for_task(task[:name])
+  tmux %{send-keys "cd / && cd #{task[:cwd].inspect}" Enter}
+  tmux %{send-keys #{task[:command].inspect} Enter}
+  tasks.each do |task|
     tmux %{split-window -h -t "#{project}:1"}
-    tmux %{send-keys "setpane #{key}" Enter}
-    tmux %{send-keys #{tasks[key].inspect} Enter}
+    tmux %{send-keys "setpane #{task[:name].inspect}" Enter}
+    env_for_task(task[:name])
+    tmux %{send-keys "cd / && cd #{task[:cwd].inspect}" Enter}
+    tmux %{send-keys #{task[:command].inspect} Enter}
   end
 end
 
-tmux %{new-window -t "#{project}:2" -n "Log"}
-tmux %{send-keys "setpane Log" Enter}
-tmux %{send-keys "tail -n 0 -f log/development.log" Enter}
+if File.exist?("log/development.log")
+  tmux %{new-window -t "#{project}:2" -n "Log"}
+  tmux %{send-keys "setpane Log" Enter}
+  tmux %{send-keys "tail -n 0 -f log/development.log" Enter}
 
-tmux %{select-window -t "#{project}:1"}
+  tmux %{select-window -t "#{project}:1"}
+end
 
 puts "\e]0;tmux: #{project}\007"
 
