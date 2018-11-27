@@ -1,1 +1,0 @@
-/Users/piotr/Work/dev_env/src/go/t-p-l.com

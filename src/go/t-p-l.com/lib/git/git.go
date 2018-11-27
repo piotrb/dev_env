@@ -2,8 +2,9 @@ package gitutil
 
 import (
 	"errors"
-	"gopkg.in/libgit2/git2go.v27"
 	"strings"
+
+	"gopkg.in/libgit2/git2go.v27"
 	"t-p-l.com/lib/utils"
 )
 

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/fsnotify/fsnotify"
 	"log"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 func main() {
