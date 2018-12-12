@@ -61,7 +61,7 @@ module Commands
       end
 
       def init_docker
-        run_cmd "docker-compose build"
+        run_cmd "docker-compose build" if config[:build]
       end
 
       def setup_interrupt
@@ -147,6 +147,7 @@ module Commands
       end
 
       def run_cmd(cmd)
+        puts "> #{cmd}"
         system cmd
         raise "failed: #{$?.exitstatus}" unless $?.success?
       end
