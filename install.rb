@@ -97,10 +97,12 @@ git_config = {
   },
   pull: {
     rebase: true,
+    tags: true,
   },
   fetch: {
     prune: true,
     pruneTags: true,
+    tags: true,
   },
   core: {
     mergeoptions: '--no-edit',

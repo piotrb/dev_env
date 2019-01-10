@@ -59,6 +59,7 @@ railways.cache
 # Temporary stuff
 public/attachments
 .env.muxp
+.overmind.env
 
 tmux-client-*.log
 tmux-server-*.log

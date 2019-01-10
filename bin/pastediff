@@ -1,0 +1,3 @@
+cat /dev/stdin > /tmp/pastediff.input
+pbpaste > /tmp/pastediff.paste
+diff -u /tmp/pastediff.paste /tmp/pastediff.input

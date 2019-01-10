@@ -1,4 +1,6 @@
+#!env ruby
 require 'erb'
+require 'fileutils'
 
 TEMPLATE = <<-TEMPLATE
 #!env ruby
@@ -19,4 +21,5 @@ Dir['commands/*.rb'].each do |cmd|
   body = ERB.new(TEMPLATE).result(binding)
   puts "writing #{exe_name} ..."
   File.open("../../bin/#{exe_name}", "w") { |fh| fh.write(body) }
+  FileUtils.chmod 0755, "../../bin/#{exe_name}"
 end

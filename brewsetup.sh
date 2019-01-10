@@ -23,3 +23,6 @@ brew install n
 
 # Puma Dev
 # brew install puma-dev
+
+# Foreman-like process manager
+brew install overmind
