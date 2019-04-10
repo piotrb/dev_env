@@ -1,18 +1,16 @@
 antigen use oh-my-zsh
 
-antigen bundle github
+#antigen bundle github
 
 antigen bundle ELLIOTTCABLE/rbenv.plugin.zsh
 
 antigen bundle git
 
 antigen bundle valentinocossar/vscode
-antigen bundle Tarrasch/zsh-command-not-found
+#antigen bundle Tarrasch/zsh-command-not-found
 antigen bundle unixorn/rake-completion.zshplugin
-#antigen bundle lukechilds/zsh-nvm
 antigen bundle zsh-users/zsh-autosuggestions
-antigen bundle paulmelnikow/zsh-startup-timer
+#antigen bundle paulmelnikow/zsh-startup-timer
 antigen bundle nojhan/liquidprompt
-
 
 antigen apply
