@@ -1,4 +1,5 @@
 require_relative "../lib/command_helpers"
+require_relative "../lib/git"
 
 module Commands
   module BranchMigrations
@@ -27,9 +28,9 @@ module Commands
         end
       end
 
-
       def list
-        `git log --name-only --pretty="format:" develop..HEAD db/migrate`.split("\n").map(&:strip).reject(&:empty?)
+        base_branch = Git.branch_exists?("develop") ? "develop" : "master"
+        `git log --name-only --pretty="format:" #{base_branch}..HEAD db/migrate`.split("\n").map(&:strip).reject(&:empty?).uniq
       end
     end
   end

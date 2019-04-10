@@ -1,6 +1,7 @@
 require 'optparse'
 
 require_relative "../lib/command_helpers"
+require_relative "../lib/git"
 
 module Commands
   module BranchRebase
@@ -36,56 +37,47 @@ module Commands
           end
         end.parse!(args)
 
-        fail("git is dirty") if git_dirty?
-        tmp_branch = "#{branch_name}-base"
+        fail("git is dirty") if Git.dirty?
+        tmp_branch = "tmp-base/#{branch_name}"
 
-        run_shell "git fetch origin"
+        Git.fetch("origin", quiet: true)
 
         begin
-          if git_branch_exists?(tmp_branch)
-            run_shell "git branch -D #{tmp_branch.inspect}"
+          if Git.branch_exists?(tmp_branch)
+            Git.delete_branch(tmp_branch, force: true)
           end
-          run_shell "git checkout -b #{tmp_branch.inspect}"
+          Git.checkout(to_branch: tmp_branch)
 
-          run_shell "git reset --hard origin/develop"
+          Git.reset("origin/develop", hard: true)
           bases = bases_from_config
           bases.each do |base|
-            run_shell "git merge --no-edit origin/#{base}"
-            run_shell "git rebase origin/develop"
+            Git.merge("origin/#{base}", ff: false, edit: false)
           end
         ensure
-          run_shell "git checkout #{branch_name.inspect}"
+          Git.checkout(branch_name)
         end
 
-        begin
-          original_head = capture_shell("git rev-parse HEAD").strip
-          run_shell "git rebase #{options[:interactive] ? "-i" : ""} #{tmp_branch.inspect} #{branch_name.inspect}"
-        rescue
-          run_shell "git rebase --abort"
-          run_shell "git reset --hard #{original_head}"
+        status = Git.rebase(tmp_branch, return_status: true, interactive: options[:interactive])
+        if status != 0
+          $stderr.puts "Rebase failed!"
+          $stderr.puts "Follow the regular rebase process to finish it up"
+        else
+          Git.delete_branch(tmp_branch, force: true)
         end
       end
 
       private
 
-      def git_branch_exists?(name)
-        capture_shell("git rev-parse --verify #{name.inspect}", error: false).strip != ""
-      end
-
-      def git_dirty?
-        run_shell("git diff --stat head", quiet: true, return_status: true) > 0
-      end
-
       def save_bases_to_config(new_bases)
-        run_shell("git config branch.#{branch_name}.base-branches #{new_bases.join(",").inspect}")
+        Git.set_config("branch.#{branch_name}.base-branches", new_bases.join(","))
       end
 
       def bases_from_config
-        capture_shell("git config branch.#{branch_name}.base-branches", error: false).strip.split(",")
+        Git.get_config("branch.#{branch_name}.base-branches").split(",")
       end
 
       def branch_name
-        @branch_name ||= capture_shell("git rev-parse --abbrev-ref HEAD").strip
+        @branch_name ||= Git.current_branch
       end
     end
   end

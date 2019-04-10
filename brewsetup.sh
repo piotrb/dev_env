@@ -10,13 +10,14 @@ brew install libgit2 go
 brew install rbenv ruby-build rbenv-gemset
 
 # Terminal Tools
-brew install the_platinum_searcher vim wget tmux avn tig git reattach-to-user-namespace ctags direnv terraform_landscape
+brew install the_platinum_searcher neovim wget tmux avn tig git reattach-to-user-namespace ctags direnv terraform_landscape
 
 # AWS CLI
 brew install awscli
 
-# N Node Manager
-brew install n
+# Node
+brew tap ouchxp/nodenv
+brew install node nodenv nodenv-nvmrc
 
 # Some additional languages and tools
 #brew install mysql scala postgresql memcached

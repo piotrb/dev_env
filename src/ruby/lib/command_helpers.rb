@@ -15,17 +15,17 @@ module CommandHelpers
     end
   end
 
-  def run_shell(command, return_status: false, quiet: false)
-    puts "$> #{command}" unless quiet
-    command = " 1>/dev/null 2>/dev/null" if quiet
+  def run_shell(command, return_status: false, echo_command: true, quiet: false)
+    puts "$> #{command}" if echo_command
+    command += " 1>/dev/null 2>/dev/null" if quiet
     system "#{command}"
     code = $?.exitstatus
     raise("failed with code: #{code}") if !return_status && code > 0
     code
   end
 
-  def capture_shell(command, error: true)
-    puts "<< #{command}"
+  def capture_shell(command, error: true, echo_command: true)
+    puts "<< #{command}" if echo_command
     command += " 2>/dev/null" unless error
     `#{command}`
   end

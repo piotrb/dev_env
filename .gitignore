@@ -63,3 +63,5 @@ public/attachments
 
 tmux-client-*.log
 tmux-server-*.log
+
+.envrc

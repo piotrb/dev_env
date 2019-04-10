@@ -19,7 +19,7 @@ module Commands
             cwd:     dir,
             commands: [
               "terraform init",
-              "exec terraform apply"
+              "terraform plan -out foo.tfplan | landscape"
             ],
           }
         }
