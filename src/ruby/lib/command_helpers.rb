@@ -1,6 +1,6 @@
 module CommandHelpers
   def valid_commands
-    methods.grep(/^cmd_/).map { |method| method.to_s.gsub(/^cmd_/, '') }
+    methods.grep(/^cmd_/).map { |method| method.to_s.gsub(/^cmd_/, "") }
   end
 
   def dispatch_valid_commands(args)

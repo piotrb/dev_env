@@ -5,13 +5,13 @@
 #
 # see more at http://zed.0xff.me/2010/01/28/rspec-bisect
 
-$rspec_runner = 'rspec'
-$target       = nil
-$shuffle      = false
-$use_fork     = false
-$reverse      = false
+$rspec_runner = "rspec"
+$target = nil
+$shuffle = false
+$use_fork = false
+$reverse = false
 
-require 'optparse'
+require "optparse"
 
 op = OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} [options] [specs] [target_spec]"
@@ -47,7 +47,7 @@ end
 target = $target || specs.pop
 specs.delete(target)
 specs.delete("./#{target}")
-specs.delete(target.sub(/^\.\//,''))
+specs.delete(target.sub(/^\.\//, ""))
 if $shuffle
   specs.shuffle!
 else
@@ -60,11 +60,11 @@ puts "[.] #{specs.size} candidate specs"
 
 if $use_fork
   puts "[.] preloading Rails environment.."
-  ENV["RAILS_ENV"] ||= 'test'
+  ENV["RAILS_ENV"] ||= "test"
   # require File.expand_path(File.join(File.dirname(__FILE__),'..','config','environment'))
-  require './config/environment'
+  require "./config/environment"
 
-  require 'rspec'
+  require "rspec"
 
   module Spec::Runner
     class << self
@@ -75,22 +75,22 @@ if $use_fork
   end
 
   @tmpfile = "tmp/rspec_bisect.#{$$}.tmp"
-  File.open(@tmpfile,'w'){} # create file
+  File.open(@tmpfile, "w") { } # create file
   at_exit do
     # protect from accidents
     File.unlink(@tmpfile) if @tmpfile =~ /^tmp\/rspec_bisect\.\d+\.tmp$/
   end
 end
 
-def run_here specs, target
-  `#{$rspec_runner} #{specs.join(' ')} #{target}`
+def run_here(specs, target)
+  `#{$rspec_runner} #{specs.join(" ")} #{target}`
 end
 
-def run_forked specs, target
+def run_forked(specs, target)
   pid = fork do
-    Object.send(:remove_const,'ARGV')
-    Object.const_set('ARGV', specs + [target])
-    $stdout = $stderr = File.open(@tmpfile,'w')
+    Object.send(:remove_const, "ARGV")
+    Object.const_set("ARGV", specs + [target])
+    $stdout = $stderr = File.open(@tmpfile, "w")
     begin
       ::Spec::Runner::run
     rescue SystemExit
@@ -104,44 +104,43 @@ def run_forked specs, target
   File.read(@tmpfile)
 end
 
-def run_specs target, specs
-  puts "./script/spec #{specs.join(' ')} #{target}"
-  printf "[.] running %4d specs.. ", specs.size+1
+def run_specs(target, specs)
+  puts "./script/spec #{specs.join(" ")} #{target}"
+  printf "[.] running %4d specs.. ", specs.size + 1
   STDOUT.flush
   t0 = Time.now
-  t = $use_fork ? run_forked(specs,target) : run_here(specs,target)
+  t = $use_fork ? run_forked(specs, target) : run_here(specs, target)
   r = false
   if t["#{target}:"]
     lines = t.strip.split("\n")
-    lines.each_with_index do |line,idx|
-      if line["#{target}:"] && idx>0 && !lines[idx-1]['(Not Yet Implemented)']
+    lines.each_with_index do |line, idx|
+      if line["#{target}:"] && idx > 0 && !lines[idx - 1]["(Not Yet Implemented)"]
         r = true
         break
       end
     end
   end
-  counts = t[/^\d+ examples, .*$/].to_s.strip.gsub(/[a-z,]/,'').strip.gsub(/ +/,"/")
-  puts "Done. (#{(Time.now - t0).to_i}s) (#{counts})\t: target #{r ? 'OK' : 'FAIL'}"
+  counts = t[/^\d+ examples, .*$/].to_s.strip.gsub(/[a-z,]/, "").strip.gsub(/ +/, "/")
+  puts "Done. (#{(Time.now - t0).to_i}s) (#{counts})\t: target #{r ? "OK" : "FAIL"}"
   printf("Done. (%3ds) (%s)\t: target %s\n",
-    (Time.now - t0).to_i,
-    counts,
-    r ? 'FAIL' : 'OK'
-  )
+         (Time.now - t0).to_i,
+         counts,
+         r ? "FAIL" : "OK")
   r
 end
 
-def process_candidates target, specs
+def process_candidates(target, specs)
   if specs.size <= 1
     puts "[*] found matching spec: #{specs.first}"
     exit
   else
-    if run_specs target, specs[0...specs.size/2]
-      process_candidates target, specs[0...specs.size/2]
-    elsif run_specs target, specs[specs.size/2..-1]
-      process_candidates target, specs[specs.size/2..-1]
+    if run_specs target, specs[0...specs.size / 2]
+      process_candidates target, specs[0...specs.size / 2]
+    elsif run_specs target, specs[specs.size / 2..-1]
+      process_candidates target, specs[specs.size / 2..-1]
     else
       puts "[?] all specs ran OK"
-#      run_specs target, specs
+      #      run_specs target, specs
     end
   end
 end

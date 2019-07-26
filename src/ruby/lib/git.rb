@@ -37,9 +37,9 @@ module Git
       "git checkout",
       quiet ? "-q" : nil,
       ref ? ref.inspect : nil,
-      to_branch ? "-b #{to_branch}" : nil
+      to_branch ? "-b #{to_branch}" : nil,
     ]
-    run_shell cmd.compact.join(' ')
+    run_shell cmd.compact.join(" ")
   end
 
   def rebase(upstream, branch = nil, interactive: false, return_status: false)
@@ -49,7 +49,7 @@ module Git
       upstream ? upstream.inspect : nil,
       branch ? branch.inspect : nil,
     ]
-    run_shell cmd.compact.join(' '), return_status: return_status
+    run_shell cmd.compact.join(" "), return_status: return_status
   end
 
   def merge(ref, ff: nil, edit: nil)
@@ -57,18 +57,18 @@ module Git
       "git merge",
       ff.nil? ? nil : (ff ? "--ff" : "--no-ff"),
       edit.nil? ? nil : (edit ? "--edit" : "--no-edit"),
-      ref.inspect
+      ref.inspect,
     ]
-    run_shell cmd.compact.join(' '), quiet: true
+    run_shell cmd.compact.join(" "), quiet: true
   end
 
   def reset(ref, hard: false)
     cmd = [
       "git reset",
       hard ? "--hard" : nil,
-      ref.inspect
+      ref.inspect,
     ]
-    run_shell cmd.compact.join(' ')
+    run_shell cmd.compact.join(" ")
   end
 
   extend self

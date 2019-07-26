@@ -1,6 +1,6 @@
 #!env ruby
 
-require 'pathname'
+require "pathname"
 
 def run(cmd)
   puts "$ #{cmd}"
@@ -15,7 +15,7 @@ failing_files = STDIN.readlines.map do |line|
   pn.to_s
 end.uniq
 
-all_specs = Dir['spec/**/*_spec.rb']
+all_specs = Dir["spec/**/*_spec.rb"]
 
 passing_specs = all_specs - failing_files
 
@@ -24,7 +24,7 @@ passing_specs = all_specs - failing_files
 failing_files.each do |file|
   puts "Processing #{file} ..."
   puts "-----------------------------------"
-  run("rspec-bisect.rb #{passing_specs.join(' ')} #{file}")
+  run("rspec-bisect.rb #{passing_specs.join(" ")} #{file}")
   exit
 end
 

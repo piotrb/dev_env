@@ -1,20 +1,20 @@
-require 'yaml'
-require 'open3'
-require 'ansi'
+require "yaml"
+require "open3"
+require "ansi"
 
 module Commands
   module BisectTests
     class << self
       def run(_args)
-        all_tests = File.read(config['all_tests_from']).split("\n").map(&:strip)
-        failing   = config['failing']
-        skip      = config['skip']
-        passing   = all_tests - failing - skip
+        all_tests = File.read(config["all_tests_from"]).split("\n").map(&:strip)
+        failing = config["failing"]
+        skip = config["skip"]
+        passing = all_tests - failing - skip
 
         setup_interrupt
 
-        cmd_base = config['command']
-        use_docker = config['docker']
+        cmd_base = config["command"]
+        use_docker = config["docker"]
 
         init_docker if use_docker
 
@@ -24,7 +24,6 @@ module Commands
           matching_batches = []
 
           with_docker_compose(use_docker: use_docker) do
-
             puts "Processing failing file: #{failing_file} ..."
 
             puts "Running it on its own to be sure ..."
@@ -42,8 +41,8 @@ module Commands
             end
 
             results << {
-              failing_file:     failing_file,
-              result:           result,
+              failing_file: failing_file,
+              result: result,
               matching_batches: matching_batches,
             }
           end
@@ -74,7 +73,7 @@ module Commands
       end
 
       def run_part(side, level, part, &block)
-        puts "[running #{side} set (level: #{level.join('.')}, items: #{part.length})]"
+        puts "[running #{side} set (level: #{level.join(".")}, items: #{part.length})]"
         result = block.call(part)
         puts "[#{side} result: #{result.inspect}]"
         result
@@ -94,7 +93,7 @@ module Commands
           puts
           puts "=" * 80
           puts " Repro command:"
-          puts "#{config['command']} #{failing_file.inspect} #{result.inspect}"
+          puts "#{config["command"]} #{failing_file.inspect} #{result.inspect}"
         else
           puts
           puts "=" * 80
@@ -114,15 +113,15 @@ module Commands
         return nil if @interrupt
         part1, part2 = split_batch(list)
 
-        result1 = run_part(:left, level + ['l'], part1, &block)
-        result2 = run_part(:right, level + ['r'], part2, &block) if result1 == :good
+        result1 = run_part(:left, level + ["l"], part1, &block)
+        result2 = run_part(:right, level + ["r"], part2, &block) if result1 == :good
 
         if result1 == :bad
           matching_batches << part1
           if part1.length == 1
             return part1.first
           else
-            return in_bsearch_batches(part1, level: level + ['l'], matching_batches: matching_batches, &block)
+            return in_bsearch_batches(part1, level: level + ["l"], matching_batches: matching_batches, &block)
           end
         end
 
@@ -131,7 +130,7 @@ module Commands
           if part2.length == 1
             return part2.first
           else
-            return in_bsearch_batches(part2, level: level + ['r'], matching_batches: matching_batches, &block)
+            return in_bsearch_batches(part2, level: level + ["r"], matching_batches: matching_batches, &block)
           end
         end
 
@@ -142,7 +141,7 @@ module Commands
           puts "*" * 80
 
           list = list.shuffle
-          return in_bsearch_batches(list, level: level + ['SHUFFLE'], matching_batches: matching_batches, &block)
+          return in_bsearch_batches(list, level: level + ["SHUFFLE"], matching_batches: matching_batches, &block)
         end
       end
 
@@ -156,7 +155,7 @@ module Commands
         if use_docker
           begin
             @batch_name = "#{File.basename(Dir.getwd)}-#{Process.pid}"
-            run_cmd to_docker_cmd(config['init_cmd'])
+            run_cmd to_docker_cmd(config["init_cmd"])
             yield
           ensure
             run_cmd "docker-compose -p #{@batch_name.inspect} down -v"
@@ -175,9 +174,9 @@ module Commands
       end
 
       def execute_batch(cmd_base, batch, failing_file, use_docker: false)
-        cmd = to_docker_cmd("#{cmd_base} #{(batch + [failing_file]).map(&:inspect).join(' ')}")
+        cmd = to_docker_cmd("#{cmd_base} #{(batch + [failing_file]).map(&:inspect).join(" ")}")
         puts ansi("[running batch with #{batch.length} additional files]", :cyan)
-        File.open('batch_log.log', "w+") do |fh|
+        File.open("batch_log.log", "w+") do |fh|
           Open3.popen2e(cmd) do |i, o, t|
             i.close
             to = Thread.new do

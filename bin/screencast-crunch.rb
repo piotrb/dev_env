@@ -2,7 +2,7 @@
 
 def output_path(input)
   ext = File.extname(input)
-  base_name = input[0..(-1*(ext.length+1))]
+  base_name = input[0..(-1 * (ext.length + 1))]
   "#{base_name} (compressed)#{ext}"
 end
 

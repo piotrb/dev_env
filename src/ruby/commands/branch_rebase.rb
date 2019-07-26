@@ -1,4 +1,4 @@
-require 'optparse'
+require "optparse"
 
 require_relative "../lib/command_helpers"
 require_relative "../lib/git"

@@ -1,7 +1,7 @@
 #!env ruby
 
 def sh(command)
-	system(command) || exit($?.status)
+  system(command) || exit($?.status)
 end
 
 puts "Convering images into an initial pdf ..."
@@ -27,4 +27,3 @@ sh "ps2pdf output.ps output.pdf"
 File.unlink("output.ps")
 
 puts "Done"
-

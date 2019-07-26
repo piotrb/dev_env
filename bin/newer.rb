@@ -1,5 +1,5 @@
 #!env ruby
-require 'chronic'
+require "chronic"
 
 path, newer_than = ARGV
 
@@ -18,9 +18,8 @@ files.sort_by! { |f| File.mtime(f) }
 g = files.group_by { |f| mt = File.mtime(f); Time.local(mt.year, mt.month, mt.day) }
 
 g.each do |date, files|
-  puts "#{date.strftime('%Y-%m-%d')}"
+  puts "#{date.strftime("%Y-%m-%d")}"
   files.each do |f|
     puts " - #{f}"
   end
 end
-

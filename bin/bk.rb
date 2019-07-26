@@ -1,14 +1,14 @@
 #!env ruby
-require 'aws'
-require 'yaml'
+require "aws"
+require "yaml"
 
-gem 'eventmachine'
-gem 'promise.rb'
+gem "eventmachine"
+gem "promise.rb"
 # gem 'pry'
 
-require 'active_support/all'
-require 'eventmachine'
-require 'promise'
+require "active_support/all"
+require "eventmachine"
+require "promise"
 # require 'pry'
 
 Thread.abort_on_exception = true
@@ -20,38 +20,38 @@ class MyPromise < Promise
 end
 
 class App
-  TIMINGS_BUCKET_NAME = 'ph-buildkite-timings'
-  REGION = 'us-west-2'
+  TIMINGS_BUCKET_NAME = "ph-buildkite-timings"
+  REGION = "us-west-2"
 
   def self.run
     new.run
   end
-  
+
   def initialize
-    @cache = ActiveSupport::Cache.lookup_store(:file_store, File.expand_path('~/Work/tmp/cache'))
+    @cache = ActiveSupport::Cache.lookup_store(:file_store, File.expand_path("~/Work/tmp/cache"))
   end
-  
+
   attr_reader :cache, :s3
-  
+
   def run
     init_aws
 
-    MyPromise.all(process_all_candidates).then(-> (_) {
+    MyPromise.all(process_all_candidates).then(->(_) {
       EM.stop
-    }, -> (*reasons) {
+    }, ->(*reasons) {
       puts "something went wrong: #{reasons.inspect}"
       exit 1
     })
   end
-  
+
   private
 
   def process_all_candidates
     bucket = s3.buckets[TIMINGS_BUCKET_NAME]
     branch = current_branch
-    
-    slug = ENV.fetch('SLUG')
-    build = ENV.fetch('BUILD')
+
+    slug = ENV.fetch("SLUG")
+    build = ENV.fetch("BUILD")
 
     candidate_promises = []
 
@@ -83,17 +83,17 @@ class App
         promises << promise
       end
 
-      MyPromise.all(promises).then(-> (values) {
+      MyPromise.all(promises).then(->(values) {
         puts "\n#{name}: "
 
         all_files = []
 
         values.each do |files|
-          all_files += files.strip.split(' ')
+          all_files += files.strip.split(" ")
         end
 
         all_files = all_files.map { |file|
-          file.gsub(/^\.\//, '').gsub(/(:|\[).*$/, '')
+          file.gsub(/^\.\//, "").gsub(/(:|\[).*$/, "")
         }.sort
 
         all_files = all_files.group_by { |x| x }
@@ -101,7 +101,7 @@ class App
         all_files.each do |file, instances|
           puts "- #{file} (#{instances.count})"
         end
-      }, -> (*reasons) {
+      }, ->(*reasons) {
         puts "something went wrong: #{reasons.inspect}"
       })
     }
@@ -115,10 +115,10 @@ class App
     config = YAML.load_file(File.expand_path("~/.aws/ph-test/aws.yml"))
 
     AWS.config(config.merge(region: REGION))
-    
+
     @s3 = AWS::S3.new
   end
-  
+
   def get_candidate_names(bucket, slug)
     prefix = "#{slug}/"
     tree = bucket.as_tree(prefix: prefix)

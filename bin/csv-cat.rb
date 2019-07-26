@@ -1,6 +1,6 @@
 #!env ruby
-require 'terminal-table'
-require 'csv'
+require "terminal-table"
+require "csv"
 
 table = Terminal::Table.new
 

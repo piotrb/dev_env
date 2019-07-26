@@ -1,6 +1,6 @@
 #!env ruby
-require 'fileutils'
-require 'pathname'
+require "fileutils"
+require "pathname"
 
 def doLink(fn, dst, options = {})
   options = {
@@ -52,14 +52,14 @@ def doGetHttp(url, path)
 end
 
 def doShell(shell)
-  unless ENV['SHELL'] == shell
+  unless ENV["SHELL"] == shell
     doRun "chsh -s #{shell}"
   end
 end
 
 def flat_hash(hash, k = [])
-  return {k => hash} unless hash.is_a?(Hash)
-  hash.inject({}){ |h, v| h.merge! flat_hash(v[-1], k + [v[0]]) }
+  return { k => hash } unless hash.is_a?(Hash)
+  hash.inject({}) { |h, v| h.merge! flat_hash(v[-1], k + [v[0]]) }
 end
 
 doRun "git submodule init && git submodule sync && git submodule update"
@@ -88,8 +88,8 @@ doShell "/bin/zsh"
 
 # vim
 doDir "~/.vim/bundle"
-doClone 'https://github.com/gmarik/Vundle.vim.git', '~/.vim/bundle/Vundle.vim'
-doLink "vim/bundle.vim", "~/.vim", as: 'bundle.vim'
+doClone "https://github.com/gmarik/Vundle.vim.git", "~/.vim/bundle/Vundle.vim"
+doLink "vim/bundle.vim", "~/.vim", as: "bundle.vim"
 
 git_config = {
   gui: {
@@ -105,9 +105,9 @@ git_config = {
     tags: true,
   },
   core: {
-    mergeoptions: '--no-edit',
+    mergeoptions: "--no-edit",
     excludesfile: File.expand_path("~/.gitignore"),
-    pager: 'less -FX',
+    pager: "less -FX",
   },
   push: {
     default: "current",
@@ -120,9 +120,9 @@ git_config = {
     compactionHeuristic: 1,
   },
   pager: {
-    log: 'diff-highlight | less -FX',
-    show: 'diff-highlight | less -FX',
-    diff: 'diff-highlight | less -FX',
+    log: "diff-highlight | less -FX",
+    show: "diff-highlight | less -FX",
+    diff: "diff-highlight | less -FX",
   },
   alias: {
     lg: "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)%Creset' --abbrev-commit",
@@ -130,10 +130,10 @@ git_config = {
   },
   rebase: {
     instructionFormat: "[%an] - %s",
-  }
+  },
 }
 
-flat_hash(git_config).each do |k,v|
+flat_hash(git_config).each do |k, v|
   key = k.map(&:to_s).join(".")
   doRun "git config --global #{key} #{v.to_s.inspect}"
 end

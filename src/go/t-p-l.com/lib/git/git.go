@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"gopkg.in/libgit2/git2go.v27"
+	git "gopkg.in/libgit2/git2go.v27"
 	"t-p-l.com/lib/utils"
 )
 

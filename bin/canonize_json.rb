@@ -1,4 +1,4 @@
 #!env ruby
-require 'json'
+require "json"
 
 puts JSON.pretty_generate(JSON.parse(STDIN.read))
