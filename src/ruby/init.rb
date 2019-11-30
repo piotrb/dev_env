@@ -3,6 +3,7 @@ require "shellwords"
 require "ap"
 require "yaml"
 require "pry"
+require 'English'
 
 def execute_command(name, args)
   require_relative "commands/#{name}"

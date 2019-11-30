@@ -91,6 +91,10 @@ doDir "~/.vim/bundle"
 doClone "https://github.com/gmarik/Vundle.vim.git", "~/.vim/bundle/Vundle.vim"
 doLink "vim/bundle.vim", "~/.vim", as: "bundle.vim"
 
+# Git
+
+doLink ".gitmessage", "~"
+
 git_config = {
   gui: {
     gcwarning: false,
@@ -103,6 +107,9 @@ git_config = {
     prune: true,
     pruneTags: true,
     tags: true,
+  },
+  commit: {
+    template: File.expand_path("~/.gitmessage"),
   },
   core: {
     mergeoptions: "--no-edit",

@@ -10,7 +10,7 @@ brew install libgit2 go
 brew install rbenv ruby-build rbenv-gemset
 
 # Terminal Tools
-brew install the_platinum_searcher neovim wget tmux avn tig git reattach-to-user-namespace ctags direnv terraform_landscape
+brew install the_platinum_searcher neovim wget tmux avn tig git reattach-to-user-namespace ctags direnv
 
 # AWS CLI
 brew install awscli

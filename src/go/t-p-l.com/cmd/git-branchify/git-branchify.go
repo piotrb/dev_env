@@ -16,7 +16,9 @@ var epic = flag.Bool("e", false, "Create as an Epic branch")
 var hotfix = flag.Bool("h", false, "Create as a Hotfix branch")
 var techdebt = flag.Bool("t", false, "Create as a Tech Debt branch")
 var sub = flag.Bool("s", false, "Create as a Sub branch")
+var subSeparator = flag.String("ss", "_", "string to separate sub tasks with")
 var jira = flag.String("j", "", "Tag with Jira ticket/s")
+var jiraSeparator = flag.String("js", "_", "string to separate jira prefix with")
 
 func main() {
 	flag.Parse()
@@ -49,7 +51,7 @@ func main() {
 		var currentBranch = strings.TrimSpace(utils.Backtick("git", "rev-parse", "--symbolic-full-name", "--abbrev-ref", "HEAD"))
 		var pieces = strings.Split(currentBranch, "/")
 		currentBranch = pieces[len(pieces)-1]
-		name = fmt.Sprintf("%s-%s", currentBranch, name)
+		name = fmt.Sprintf("%s%s%s", currentBranch, *subSeparator, name)
 	}
 
 	if *feature {
@@ -69,7 +71,7 @@ func main() {
 	}
 
 	if *jira != "" {
-		name = fmt.Sprintf("%s-%s", *jira, name)
+		name = fmt.Sprintf("%s%s%s", *jira, *jiraSeparator, name)
 	}
 
 	fmt.Printf("name: %v\n", name)

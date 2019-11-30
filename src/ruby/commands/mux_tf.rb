@@ -60,6 +60,7 @@ module Commands
             cmd_part = task[:cmd] ? task[:cmd].inspect : nil
             tmux %(split-window #{cwd_part} -h -t "#{project}:1" #{cmd_part})
             tmux %(select-pane -T #{task[:name].inspect})
+            tmux "select-layout tiled"
             task[:commands].each do |cmd|
               tmux %(send-keys #{cmd.inspect} Enter)
             end if task[:commands]
@@ -93,12 +94,16 @@ module Commands
           elsif $?.exitstatus == 1
             puts "something went wrong"
           elsif $?.exitstatus == 2
-            puts "there is changes ..."
+            system("terraform show #{PLAN_FILENAME}") if options[:show_on_changes]
           else
             puts "unknown exit code: #{$?.exitstatus}"
           end
-          system ENV['SHELL']
+          system ENV["SHELL"]
         end
+      rescue Exception => e
+        p e
+        sleep 5
+        throw e
       end
 
       private
@@ -106,6 +111,7 @@ module Commands
       def get_options
         options = {
           use_landscape: false,
+          show_on_changes: !!ENV['MUX_TF_SHOW_ON_CHANGES'],
         }
 
         tf_version = `terraform version`[/Terraform v(\d+\.\d+\.\d+)/, 1]
@@ -121,7 +127,7 @@ module Commands
       end
 
       def find_pane(name)
-        panes = `tmux list-panes -F "\#{pane_id},\#{pane_title}"`.strip.split("\n").map { |row| x = row.split(","); { id: x[0], name: x[1] }}
+        panes = `tmux list-panes -F "\#{pane_id},\#{pane_title}"`.strip.split("\n").map { |row| x = row.split(","); { id: x[0], name: x[1] } }
         panes.find { |pane| pane[:name] == name }
       end
 
@@ -137,10 +143,10 @@ module Commands
       def tmux(cmd, raise_on_error: true, mode: :system)
         case mode
         when :system
-          p "tmux #{cmd}"
+          puts " => tmux #{cmd}"
           system("tmux #{cmd}")
           unless $CHILD_STATUS.success?
-            raise("failed") if raise_on_error
+            raise("failed with code: #{$CHILD_STATUS.exitstatus}") if raise_on_error
 
             return false
           end
