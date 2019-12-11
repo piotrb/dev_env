@@ -6,3 +6,5 @@ export PATH="$HOME/bin:$PATH:/usr/local/bin:/usr/local/sbin"
 ulimit -n 2048
 
 alias fixtty="stty sane"
+
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES

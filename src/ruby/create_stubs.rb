@@ -2,12 +2,19 @@
 require "erb"
 require "fileutils"
 
+puts "Detecting Environment ..."
+env_location = `which env`.strip
+puts "env: #{env_location}"
+
 TEMPLATE = <<-TEMPLATE
-#!env ruby
+#!#{env_location} ruby
 <%= comment %>
 require_relative '../src/ruby/init'
 execute_command(<%= script_name.to_sym.inspect %>, ARGV)
 TEMPLATE
+
+puts ""
+puts "Updating stubs ..."
 
 Dir["commands/*.rb"].each do |cmd|
   ext = File.extname(cmd)

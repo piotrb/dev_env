@@ -4,24 +4,9 @@ require_relative "../lib/env"
 
 module Commands
   module MuxTf
-    PLAN_FILENAME = "foo.tfplan"
-
     class << self
-      def run(args)
-        case args[0]
-        when nil
-          run_main(args)
-        when "run"
-          run_current(args)
-        else
-          raise "unknown command"
-        end
-      end
-
-      def run_main(_args)
+      def run(_args)
         Env.load(".env.mux")
-
-        options = get_options
 
         ignored = []
 
@@ -32,7 +17,7 @@ module Commands
           {
             name: dir,
             cwd: dir,
-            cmd: "mux-tf run",
+            cmd: "tf-current",
           }
         end
 
@@ -79,52 +64,10 @@ module Commands
                   ""
                 end
 
-        tmux %(#{extra} attach -t "#{project}") # , mode: :exec
-      end
-
-      def run_current(args)
-        options = get_options
-        system("terraform init")
-        if $?.success?
-          landscape_option = options[:use_landscape] ? " | landscape" : ""
-          system("terraform plan -out #{PLAN_FILENAME} -detailed-exitcode #{landscape_option}")
-          if $?.exitstatus == 0
-            puts "no changes, exiting"
-            return
-          elsif $?.exitstatus == 1
-            puts "something went wrong"
-          elsif $?.exitstatus == 2
-            system("terraform show #{PLAN_FILENAME}") if options[:show_on_changes]
-          else
-            puts "unknown exit code: #{$?.exitstatus}"
-          end
-          system ENV["SHELL"]
-        end
-      rescue Exception => e
-        p e
-        sleep 5
-        throw e
+        tmux %(#{extra} attach -t "#{project}"), raise_on_error: false#, mode: :exec
       end
 
       private
-
-      def get_options
-        options = {
-          use_landscape: false,
-          show_on_changes: !!ENV['MUX_TF_SHOW_ON_CHANGES'],
-        }
-
-        tf_version = `terraform version`[/Terraform v(\d+\.\d+\.\d+)/, 1]
-        raise "could not determine terraform version!" unless tf_version
-
-        if Gem::Dependency.new("", "~> 0.11.0").match?("", tf_version)
-          options[:use_landscape] = true
-        elsif Gem::Dependency.new("", "~> 0.12.0").match?("", tf_version)
-          options[:use_landscape] = false
-        end
-
-        options
-      end
 
       def find_pane(name)
         panes = `tmux list-panes -F "\#{pane_id},\#{pane_title}"`.strip.split("\n").map { |row| x = row.split(","); { id: x[0], name: x[1] } }
@@ -143,10 +86,10 @@ module Commands
       def tmux(cmd, raise_on_error: true, mode: :system)
         case mode
         when :system
-          puts " => tmux #{cmd}"
+          # puts " => tmux #{cmd}"
           system("tmux #{cmd}")
           unless $CHILD_STATUS.success?
-            raise("failed with code: #{$CHILD_STATUS.exitstatus}") if raise_on_error
+            raise("`tmux #{cmd}' failed with code: #{$CHILD_STATUS.exitstatus}") if raise_on_error
 
             return false
           end

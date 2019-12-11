@@ -1,4 +1,4 @@
-#!env ruby
+#!/usr/bin/env ruby
 
 require_relative '../src/ruby/init'
 execute_command(:branch_migrations, ARGV)

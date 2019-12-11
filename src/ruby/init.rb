@@ -2,7 +2,7 @@ require "active_support/all"
 require "shellwords"
 require "ap"
 require "yaml"
-require "pry"
+# require "pry"
 require 'English'
 
 def execute_command(name, args)
