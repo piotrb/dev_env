@@ -17,13 +17,13 @@ module Commands
           end
         when "undo"
           puts "Undoing migrations in this branch ..."
-          list.sort.reverse.each do |file|
+          list.sort.reverse_each do |file|
             version = File.basename(file)[/^\d+/]
             run_shell "bundle exec rake db:migrate:down VERSION=#{version}"
           end
         else
-          $stderr.puts "unknown command: #{command.inspect}"
-          $stderr.puts "  valid commands: list, undo"
+          warn "unknown command: #{command.inspect}"
+          warn "  valid commands: list, undo"
           exit 1
         end
       end

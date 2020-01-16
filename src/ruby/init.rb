@@ -3,9 +3,11 @@ require "shellwords"
 require "ap"
 require "yaml"
 # require "pry"
-require 'English'
+require "English"
 
 def execute_command(name, args)
   require_relative "commands/#{name}"
-  "Commands::#{name.to_s.camelcase}".constantize.run(args)
+  klass = "Commands::#{name.to_s.camelcase}".constantize
+  klass.init if klass.respond_to? :init
+  klass.run(args)
 end

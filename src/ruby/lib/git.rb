@@ -55,8 +55,8 @@ module Git
   def merge(ref, ff: nil, edit: nil)
     cmd = [
       "git merge",
-      ff.nil? ? nil : (ff ? "--ff" : "--no-ff"),
-      edit.nil? ? nil : (edit ? "--edit" : "--no-edit"),
+      ff.nil? ? nil : (ff ? "--ff" : "--no-ff"), # rubocop:disable Style/NestedTernaryOperator
+      edit.nil? ? nil : (edit ? "--edit" : "--no-edit"), # rubocop:disable Style/NestedTernaryOperator
       ref.inspect,
     ]
     run_shell cmd.compact.join(" "), quiet: true

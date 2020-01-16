@@ -31,12 +31,12 @@ module Commands
               result = "THE FILE ITSELF!"
             else
               puts "Running it as a whole batch ..."
-              if execute_batch(cmd_base, passing, failing_file, use_docker: use_docker) == :bad
-                result = in_bsearch_batches(passing, matching_batches: matching_batches) do |batch|
+              result = if execute_batch(cmd_base, passing, failing_file, use_docker: use_docker) == :bad
+                in_bsearch_batches(passing, matching_batches: matching_batches) do |batch|
                   execute_batch(cmd_base, batch, failing_file, use_docker: use_docker)
                 end
               else
-                result = "NO FILES, the whole batch passes!"
+                "NO FILES, the whole batch passes!"
               end
             end
 
@@ -85,9 +85,10 @@ module Commands
         puts "### RESULT FOR: #{failing_file}"
         puts "#" * 80
 
+        puts
+        puts "=" * 80
+
         if result
-          puts
-          puts "=" * 80
           puts " Result: #{result.inspect}"
 
           puts
@@ -95,8 +96,6 @@ module Commands
           puts " Repro command:"
           puts "#{config["command"]} #{failing_file.inspect} #{result.inspect}"
         else
-          puts
-          puts "=" * 80
           puts " Matching Batches:"
 
           matching_batches.each do |batch|
@@ -141,7 +140,7 @@ module Commands
           puts "*" * 80
 
           list = list.shuffle
-          return in_bsearch_batches(list, level: level + ["SHUFFLE"], matching_batches: matching_batches, &block)
+          in_bsearch_batches(list, level: level + ["SHUFFLE"], matching_batches: matching_batches, &block)
         end
       end
 
@@ -179,12 +178,12 @@ module Commands
         File.open("batch_log.log", "w+") do |fh|
           Open3.popen2e(cmd) do |i, o, t|
             i.close
-            to = Thread.new do
+            to = Thread.new {
               until o.eof?
                 fh.write o.read
                 fh.flush
               end
-            end
+            }
             to.join
             puts ansi("[batch exit: #{t.value}]", :yellow)
             t.value.success? ? :good : :bad

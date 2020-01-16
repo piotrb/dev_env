@@ -13,13 +13,13 @@ module Commands
         ignored += ENV["MUX_IGNORE"].split(",") if ENV["MUX_IGNORE"]
 
         dirs = Dir["**/*/.terraform"].map { |n| n.gsub(%r{/\.terraform}, "") }
-        tasks = dirs.map do |dir|
+        tasks = dirs.map { |dir|
           {
             name: dir,
             cwd: dir,
             cmd: "tf-current",
           }
-        end
+        }
 
         tasks.reject! { |t| t[:name].in?(ignored) }
 
@@ -46,9 +46,9 @@ module Commands
             tmux %(split-window #{cwd_part} -h -t "#{project}:1" #{cmd_part})
             tmux %(select-pane -T #{task[:name].inspect})
             tmux "select-layout tiled"
-            task[:commands].each do |cmd|
+            task[:commands]&.each do |cmd|
               tmux %(send-keys #{cmd.inspect} Enter)
-            end if task[:commands]
+            end
           end
         end
 
@@ -59,18 +59,21 @@ module Commands
         puts "\e]0;tmux: #{project}\007"
 
         extra = if ENV["MUXP_CC_MODE"]
-                  "-CC"
-                else
-                  ""
-                end
+          "-CC"
+        else
+          ""
+        end
 
-        tmux %(#{extra} attach -t "#{project}"), raise_on_error: false#, mode: :exec
+        tmux %(#{extra} attach -t "#{project}"), raise_on_error: false # , mode: :exec
       end
 
       private
 
       def find_pane(name)
-        panes = `tmux list-panes -F "\#{pane_id},\#{pane_title}"`.strip.split("\n").map { |row| x = row.split(","); { id: x[0], name: x[1] } }
+        panes = `tmux list-panes -F "\#{pane_id},\#{pane_title}"`.strip.split("\n").map { |row|
+          x = row.split(",")
+          return {id: x[0], name: x[1]}
+        }
         panes.find { |pane| pane[:name] == name }
       end
 

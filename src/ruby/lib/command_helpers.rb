@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module CommandHelpers
   def valid_commands
-    methods.grep(/^cmd_/).map { |method| method.to_s.gsub(/^cmd_/, "") }
+    methods.grep(/^cmd_/).map { |method| method.to_s.gsub(/^cmd_/, '') }
   end
 
   def dispatch_valid_commands(args)
@@ -17,23 +19,72 @@ module CommandHelpers
 
   def run_shell(command, return_status: false, echo_command: true, quiet: false)
     puts "$> #{command}" if echo_command
-    command += " 1>/dev/null 2>/dev/null" if quiet
-    system "#{command}"
-    code = $?.exitstatus
+    command += ' 1>/dev/null 2>/dev/null' if quiet
+    system command.to_s
+    code = $CHILD_STATUS.exitstatus
     raise("failed with code: #{code}") if !return_status && code > 0
+
     code
   end
 
   def capture_shell(command, error: true, echo_command: true)
     puts "<< #{command}" if echo_command
-    command += " 2>/dev/null" unless error
+    command += ' 2>/dev/null' unless error
     `#{command}`
   end
 
   def fail(*messages, code: 1)
     messages.each do |message|
-      $stderr.puts(message)
+      warn(message)
     end
     exit code
+  end
+
+  def need_gem(name, version_requirements = nil, require: name)
+    begin
+      gem name, version_requirements
+    rescue Gem::MissingSpecError
+      puts "-> gem install #{name} #{version_requirements}"
+      Gem.install name, version_requirements
+      gem name, version_requirements
+    end
+
+    Kernel.require require
+  end
+
+  # option_definitions
+  # {
+  #   name: string
+  #   required?: boolean
+  #   type?: class
+  #   short?: string
+  #   long?: string
+  #   description?: string
+  # }
+  # if short and long are blank, name is used as long
+  def parse_options(option_definitions, args)
+    require 'optparse'
+    options = {}
+    remaining_args = OptionParser.new do |opts|
+      option_definitions.each do |od|
+        opt_args = [
+          od[:required] ? :REQUIRED : nil,
+          od[:type],
+          od[:short],
+          od[:long],
+          od[:short].nil? && od[:long].nil? ? od[:name] : nil,
+          od[:description]
+        ].compact
+        opts.on(*opt_args) do |v|
+          if od[:multiple]
+            options[od[:name]] ||= []
+            options[od[:name]] << v
+          else
+            options[od[:name]] = v
+          end
+        end
+      end
+    end.parse!(args)
+    [remaining_args, options]
   end
 end

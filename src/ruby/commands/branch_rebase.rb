@@ -31,11 +31,11 @@ module Commands
 
       def cmd_rebase(args)
         options = {}
-        OptionParser.new do |opts|
+        OptionParser.new { |opts|
           opts.on("-i", "Interactive") do |v|
             options[:interactive] = v
           end
-        end.parse!(args)
+        }.parse!(args)
 
         fail("git is dirty") if Git.dirty?
         tmp_branch = "tmp-base/#{branch_name}"
@@ -59,8 +59,8 @@ module Commands
 
         status = Git.rebase(tmp_branch, return_status: true, interactive: options[:interactive])
         if status != 0
-          $stderr.puts "Rebase failed!"
-          $stderr.puts "Follow the regular rebase process to finish it up"
+          warn "Rebase failed!"
+          warn "Follow the regular rebase process to finish it up"
         else
           Git.delete_branch(tmp_branch, force: true)
         end

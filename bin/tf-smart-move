@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 
 require_relative '../src/ruby/init'
-execute_command(:plan_summary, ARGV)
+execute_command(:tf_smart_move, ARGV)
