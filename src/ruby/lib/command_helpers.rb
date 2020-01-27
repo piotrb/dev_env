@@ -2,7 +2,7 @@
 
 module CommandHelpers
   def valid_commands
-    methods.grep(/^cmd_/).map { |method| method.to_s.gsub(/^cmd_/, '') }
+    methods.grep(/^cmd_/).map { |method| method.to_s.gsub(/^cmd_/, "") }
   end
 
   def dispatch_valid_commands(args)
@@ -13,13 +13,37 @@ module CommandHelpers
       public_send("cmd_#{command}", args)
     else
       fail("unknown command: #{command.inspect}",
-           "  valid commands: #{valid_commands.inspect}")
+        "  valid commands: #{valid_commands.inspect}")
+    end
+  end
+
+  def clean_env(type:, &block)
+    backup = {}
+    removed_keys = case type
+                   when :ruby
+                     ENV.keys.grep(/^(?:RBENV_|RUBYLIB)/)
+                   else
+                     raise ArgumentError, "unsupported type: #{type}"
+    end
+
+    removed_keys.each do |k|
+      backup[k] = ENV[k]
+    end
+
+    removed_keys.each do |k|
+      ENV.delete k
+    end
+
+    block.call
+  ensure
+    backup.each do |k, v|
+      ENV[k] = v
     end
   end
 
   def run_shell(command, return_status: false, echo_command: true, quiet: false)
     puts "$> #{command}" if echo_command
-    command += ' 1>/dev/null 2>/dev/null' if quiet
+    command += " 1>/dev/null 2>/dev/null" if quiet
     system command.to_s
     code = $CHILD_STATUS.exitstatus
     raise("failed with code: #{code}") if !return_status && code > 0
@@ -29,7 +53,7 @@ module CommandHelpers
 
   def capture_shell(command, error: true, echo_command: true)
     puts "<< #{command}" if echo_command
-    command += ' 2>/dev/null' unless error
+    command += " 2>/dev/null" unless error
     `#{command}`
   end
 
@@ -63,9 +87,9 @@ module CommandHelpers
   # }
   # if short and long are blank, name is used as long
   def parse_options(option_definitions, args)
-    require 'optparse'
+    require "optparse"
     options = {}
-    remaining_args = OptionParser.new do |opts|
+    remaining_args = OptionParser.new { |opts|
       option_definitions.each do |od|
         opt_args = [
           od[:required] ? :REQUIRED : nil,
@@ -73,7 +97,7 @@ module CommandHelpers
           od[:short],
           od[:long],
           od[:short].nil? && od[:long].nil? ? od[:name] : nil,
-          od[:description]
+          od[:description],
         ].compact
         opts.on(*opt_args) do |v|
           if od[:multiple]
@@ -84,7 +108,7 @@ module CommandHelpers
           end
         end
       end
-    end.parse!(args)
+    }.parse!(args)
     [remaining_args, options]
   end
 end

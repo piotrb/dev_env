@@ -1,11 +1,12 @@
-require_relative "../lib/command_helpers"
-require_relative "../lib/git"
-
 module Commands
   module BranchMigrations
     extend CommandHelpers
 
     class << self
+      def init
+        require_relative "../lib/git"
+      end
+
       def run(args)
         command = args.shift
 

@@ -1,9 +1,11 @@
-require "active_support/all"
-require "shellwords"
-require "ap"
-require "yaml"
-# require "pry"
+# frozen_string_literal: true
+
 require "English"
+
+require_relative "lib/command_helpers"
+
+need_gem = CommandHelpers.instance_method(:need_gem).bind(self)
+need_gem.call("activesupport", require: "active_support/all")
 
 def execute_command(name, args)
   require_relative "commands/#{name}"

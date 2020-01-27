@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
-require_relative "../lib/env"
-
 module Commands
   module MuxTf
     class << self
+      def init
+        require "shellwords"
+        require_relative "../lib/env"
+      end
+
       def run(_args)
         Env.load(".env.mux")
 

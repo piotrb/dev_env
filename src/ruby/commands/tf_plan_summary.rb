@@ -1,86 +1,84 @@
 # frozen_string_literal: true
 
-require_relative '../lib/command_helpers'
-
 module Commands
   module TfPlanSummary
     extend CommandHelpers
 
     class << self
       def init
-        require 'optparse'
-        require 'json'
-        require_relative '../lib/ansi.rb'
-        need_gem 'tty-prompt'
+        require "optparse"
+        require "json"
+        require_relative "../lib/ansi.rb"
+        need_gem "tty-prompt"
       end
 
       def run(args)
         options = {
           interactive: false,
-          hierarchy: false
+          hierarchy: false,
         }
 
-        args = OptionParser.new do |opts|
-          opts.on('-i') do |v|
+        args = OptionParser.new { |opts|
+          opts.on("-i") do |v|
             options[:interactive] = v
           end
-          opts.on('-h') do |v|
+          opts.on("-h") do |v|
             options[:hierarchy] = v
           end
-        end.parse!(args)
+        }.parse!(args)
 
         if options[:interactive]
-          raise 'must specify plan file in interactive mode' if args[0].blank?
+          raise "must specify plan file in interactive mode" if args[0].blank?
         end
 
         data = if args[0]
-                 JSON.parse(`terraform show -json #{args[0].inspect}`)
-               else
-                 JSON.parse(STDIN.read)
+          JSON.parse(`terraform show -json #{args[0].inspect}`)
+        else
+          JSON.parse(STDIN.read)
         end
 
         parts = []
 
-        data['resource_changes'].each do |v|
-          next unless v['change']
+        data["resource_changes"].each do |v|
+          next unless v["change"]
 
-          case v['change']['actions']
-          when ['no-op']
+          case v["change"]["actions"]
+          when ["no-op"]
             # do nothing
-          when ['create']
+          when ["create"]
             parts << {
-              action: 'create',
-              address: v['address'],
-              deps: find_deps(data, v['address'])
+              action: "create",
+              address: v["address"],
+              deps: find_deps(data, v["address"]),
             }
-          when ['update']
+          when ["update"]
             parts << {
-              action: 'update',
-              address: v['address'],
-              deps: find_deps(data, v['address'])
+              action: "update",
+              address: v["address"],
+              deps: find_deps(data, v["address"]),
             }
-          when ['delete']
+          when ["delete"]
             parts << {
-              action: 'delete',
-              address: v['address'],
-              deps: find_deps(data, v['address'])
+              action: "delete",
+              address: v["address"],
+              deps: find_deps(data, v["address"]),
             }
           when %w[delete create]
             parts << {
-              action: 'replace',
-              address: v['address'],
-              deps: find_deps(data, v['address'])
+              action: "replace",
+              address: v["address"],
+              deps: find_deps(data, v["address"]),
             }
-          when ['read']
+          when ["read"]
             parts << {
-              action: 'read',
-              address: v['address'],
-              deps: find_deps(data, v['address'])
+              action: "read",
+              address: v["address"],
+              deps: find_deps(data, v["address"]),
             }
           else
-            puts "[??] #{v['address']}"
-            puts "UNKNOWN ACTIONS: #{v['change']['actions'].inspect}"
-            puts 'TODO: update plan_summary to support this!'
+            puts "[??] #{v["address"]}"
+            puts "UNKNOWN ACTIONS: #{v["change"]["actions"].inspect}"
+            puts "TODO: update plan_summary to support this!"
           end
         end
 
@@ -105,18 +103,18 @@ module Commands
 
       def run_interactive(parts, plan_name)
         prompt = TTY::Prompt.new
-        result = prompt.multi_select('Update resources:', per_page: 99, echo: false) do |menu|
+        result = prompt.multi_select("Update resources:", per_page: 99, echo: false) { |menu|
           parts.each do |part|
             label = "[#{format_action(part[:action])}] #{format_address(part[:address])}"
             menu.choice label, part[:address]
           end
-        end
+        }
 
         if !result.empty?
-          puts 'Re-running apply with the selected resources ...'
-          system "terraform apply #{result.map { |a| "-target=#{a.inspect}" }.join(' ')}"
+          puts "Re-running apply with the selected resources ..."
+          system "terraform apply #{result.map { |a| "-target=#{a.inspect}" }.join(" ")}"
         else
-          raise 'nothing selected'
+          raise "nothing selected"
         end
       end
 
@@ -125,10 +123,10 @@ module Commands
         until parts.empty?
           part = parts.shift
           if part[:deps] == []
-            if part[:met_deps] && part[:met_deps].length > 0
-              indent = "  "
+            indent = if part[:met_deps] && part[:met_deps].length > 0
+              "  "
             else
-              indent = ""
+              ""
             end
             message = "[#{format_action(part[:action])}]#{indent} #{format_address(part[:address])}"
             if part[:met_deps]
@@ -157,18 +155,20 @@ module Commands
       end
 
       def find_config(module_root, module_name, address, parent_address)
-        if parent_address.empty?
-          module_info = module_root[module_name]
+        module_info = if parent_address.empty?
+          module_root[module_name]
         else
-          module_info = module_root[module_name]["module"]
+          module_root[module_name]["module"]
         end
 
         if m = address.match(/^module\.([^.]+)\./)
-          find_config(module_info['module_calls'], m[1], m.post_match, parent_address + ["module.#{m[1]}"])
+          find_config(module_info["module_calls"], m[1], m.post_match, parent_address + ["module.#{m[1]}"])
         else
-          resource = module_info['resources'].find do |resource|
-            address == resource['address']
-          end if module_info['resources']
+          if module_info["resources"]
+            resource = module_info["resources"].find { |resource|
+              address == resource["address"]
+            }
+          end
           [resource, parent_address]
         end
       end
@@ -183,19 +183,21 @@ module Commands
           index = m[1][0] == '"' ? m[1].gsub(/^"(.+)"$/, '\1') : m[1].to_i
         end
 
-        resource = data['prior_state']['values']['root_module']['resources'].find do |resource|
-          address == resource['address'] && index == resource['index']
-        end if data['prior_state']['values']['root_module']['resources']
+        if data["prior_state"]["values"]["root_module"]["resources"]
+          resource = data["prior_state"]["values"]["root_module"]["resources"].find { |resource|
+            address == resource["address"] && index == resource["index"]
+          }
+        end
 
         if resource && resource["depends_on"]
           result += resource["depends_on"]
         end
 
-        resource, parent_address = find_config(data['configuration'], 'root_module', address, [])
+        resource, parent_address = find_config(data["configuration"], "root_module", address, [])
         if resource
           deps = []
-          resource["expressions"].each do |k,v|
-            if v.kind_of?(Hash) && v["references"]
+          resource["expressions"].each do |k, v|
+            if v.is_a?(Hash) && v["references"]
               deps << v["references"]
             end
           end
@@ -207,15 +209,15 @@ module Commands
 
       def format_action(action)
         case action
-        when 'create'
+        when "create"
           "#{ansi(:green)}+#{ansi(:reset)}"
-        when 'update'
+        when "update"
           "#{ansi(:yellow)}~#{ansi(:reset)}"
-        when 'delete'
+        when "delete"
           "#{ansi(:red)}-#{ansi(:reset)}"
-        when 'replace'
+        when "replace"
           "#{ansi(:red)}±#{ansi(:reset)}"
-        when 'read'
+        when "read"
           "#{ansi(:cyan)}>#{ansi(:reset)}"
         else
           action
@@ -223,11 +225,11 @@ module Commands
       end
 
       def format_address(address)
-        parts = address.split('.')
+        parts = address.split(".")
         parts.each_with_index do |part, index|
           parts[index] = "#{ansi(:cyan)}#{part}#{ansi(:reset)}" if index.odd?
         end
-        parts.join('.')
+        parts.join(".")
       end
     end
   end

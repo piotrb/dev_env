@@ -1,10 +1,12 @@
-require "yaml"
-require "open3"
-require "ansi"
-
 module Commands
   module BisectTests
     class << self
+      def init
+        require "yaml"
+        require "open3"
+        require "ansi"
+      end
+
       def run(_args)
         all_tests = File.read(config["all_tests_from"]).split("\n").map(&:strip)
         failing = config["failing"]

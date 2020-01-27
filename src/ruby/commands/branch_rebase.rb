@@ -1,13 +1,14 @@
-require "optparse"
-
-require_relative "../lib/command_helpers"
-require_relative "../lib/git"
-
 module Commands
   module BranchRebase
     extend CommandHelpers
 
     class << self
+      def init
+        require "optparse"
+        require_relative "../lib/git"
+        need_gem "awesome_print"
+      end
+
       def run(args)
         dispatch_valid_commands(args)
       end

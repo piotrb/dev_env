@@ -1,5 +1,3 @@
-require_relative "../lib/command_helpers"
-
 module Commands
   module BrewUpdateInteractive
     extend CommandHelpers

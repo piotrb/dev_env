@@ -1,26 +1,24 @@
 # frozen_string_literal: true
 
-require_relative '../lib/command_helpers'
-
 module Commands
   module TfCurrent
     extend CommandHelpers
 
-    PLAN_FILENAME = 'foo.tfplan'
+    PLAN_FILENAME = "foo.tfplan"
 
     class << self
       def init
-        require 'open3'
-        require_relative '../lib/stateful_parser'
-        need_gem 'paint'
-        need_gem 'pastel'
+        require "open3"
+        require_relative "../lib/stateful_parser"
+        need_gem "paint"
+        need_gem "pastel"
       end
 
       def run(_args)
         folder_name = File.basename(Dir.getwd)
         log "Processing #{Paint[folder_name, :cyan]} ..."
 
-        ENV['TF_IN_AUTOMATION'] = '1'
+        ENV["TF_IN_AUTOMATION"] = "1"
 
         return launch_shell(:error) unless prepare_folder
 
@@ -28,23 +26,23 @@ module Commands
 
         case plan_status
         when :ok
-          log 'no changes, exiting', depth: 1
+          log "no changes, exiting", depth: 1
         when :error
-          log 'something went wrong', depth: 1
+          log "something went wrong", depth: 1
           launch_shell(plan_status)
         when :changes
-          log 'Printing Plan Summary ...', depth: 1
+          log "Printing Plan Summary ...", depth: 1
           pretty_plan_summary(PLAN_FILENAME)
           launch_shell(plan_status)
         when :unknown
           launch_shell(plan_status)
         end
       rescue Exception => e # rubocop:disable Lint/RescueException
-        puts Paint['Unhandled Exception!', :red]
-        puts '=' * 20
+        puts Paint["Unhandled Exception!", :red]
+        puts "=" * 20
         puts e.full_message
         puts
-        puts ' .. waiting 5 seconds before exit ..'
+        puts " .. waiting 5 seconds before exit .."
         sleep 5
         exit 1
       end
@@ -52,7 +50,7 @@ module Commands
       def log(message, depth: 0, newline: true)
         message = Array(message)
         message.each do |m|
-          indent = '  ' * depth
+          indent = "  " * depth
           print indent + m
           print "\n" if newline
         end
@@ -65,14 +63,14 @@ module Commands
       end
 
       def run_with_each_line(cmd)
-        exit_status = Open3.popen2e(cmd) do |_stdin, stdout_and_stderr, wait_thr|
+        exit_status = Open3.popen2e(cmd) { |_stdin, stdout_and_stderr, wait_thr|
           pid = wait_thr.pid # pid of the started process.
           until stdout_and_stderr.eof?
             raw_line = stdout_and_stderr.gets
             yield(raw_line)
           end
           wait_thr.value # Process::Status object returned.
-        end
+        }
       end
 
       def pretty_plan(filename)
@@ -91,7 +89,7 @@ module Commands
         parser.state(:plan_summary, /^Plan:/, [:plan_info])
 
         cmd = "terraform plan -out #{filename.inspect} -detailed-exitcode -compact-warnings -input=false"
-        exit_status = run_with_each_line(cmd) do |raw_line|
+        exit_status = run_with_each_line(cmd) { |raw_line|
           plan_output << raw_line
           parser.parse(raw_line.rstrip) do |state, line|
             case state
@@ -102,8 +100,8 @@ module Commands
                 p [state, line]
               end
             when :info
-              if line =~ /Acquiring state lock. This may take a few moments.../
-                log 'Acquiring state lock ...', depth: 2
+              if /Acquiring state lock. This may take a few moments.../.match?(line)
+                log "Acquiring state lock ...", depth: 2
               else
                 p [state, line]
               end
@@ -112,9 +110,9 @@ module Commands
             when :refreshing
               if phase != :refreshing
                 phase = :refreshing
-                log 'Refreshing state ', depth: 2, newline: false
+                log "Refreshing state ", depth: 2, newline: false
               else
-                print '.'
+                print "."
               end
             when :refresh_done
               if phase != :refresh_done
@@ -131,12 +129,12 @@ module Commands
               p [state, line]
             end
           end
-        end
+        }
         exit_status.exitstatus
       end
 
       def create_plan(filename)
-        log 'Preparing Plan ...', depth: 1
+        log "Preparing Plan ...", depth: 1
         exit_code = pretty_plan(filename)
         case exit_code
         when 0
@@ -154,11 +152,11 @@ module Commands
       def launch_shell(status)
         case status
         when :error, :unknown
-          log Paint['Launching shell so you can fix the issue!', :red]
+          log Paint["Launching shell so you can fix the issue!", :red]
         when :changes
-          log Paint['Launching shell so you can review the changes.', :yellow]
+          log Paint["Launching shell so you can review the changes.", :yellow]
         end
-        system ENV['SHELL']
+        system ENV["SHELL"]
       end
 
       def prepare_folder
@@ -167,14 +165,14 @@ module Commands
       end
 
       def validate
-        log 'Validating module ...', depth: 1
+        log "Validating module ...", depth: 1
         JSON.parse(`terraform validate -json`)
       end
 
       def process_remedies(remedies)
         if remedies.delete? :init
-          log 'Running terraform init ...', depth: 2
-          system('terraform init -input=false')
+          log "Running terraform init ...", depth: 2
+          system("terraform init -input=false")
           remedies = process_validation(validate)
           process_remedies(remedies)
         end
@@ -206,17 +204,17 @@ module Commands
 
         context_lines = 3
 
-        lines = range['start']['line']..range['end']['line']
-        columns = range['start']['column']..range['end']['column']
+        lines = range["start"]["line"]..range["end"]["line"]
+        columns = range["start"]["column"]..range["end"]["column"]
 
         # on ../../../modules/pods/jane_pod/main.tf line 151, in module "jane":
         # 151:   jane_resources_preset = var.jane_resources_presetx
         output = []
         lines_info = lines.size == 1 ? "#{lines.first}:#{columns.first}" : "#{lines.first}:#{columns.first} to #{lines.last}:#{columns.last}"
-        output << "on: #{range['filename']} line#{lines.size > 1 ? 's' : ''}: #{lines_info}"
+        output << "on: #{range["filename"]} line#{lines.size > 1 ? "s" : ""}: #{lines_info}"
 
-        if File.exist?(range['filename'])
-          file_lines = File.read(range['filename']).split("\n")
+        if File.exist?(range["filename"])
+          file_lines = File.read(range["filename"]).split("\n")
           extract_range = ([lines.first - context_lines, 0].max)..([lines.last + context_lines, file_lines.length - 1].min)
           file_lines.each_with_index do |line, index|
             if extract_range.cover?(index + 1)
@@ -229,13 +227,12 @@ module Commands
                   start_col = columns.last
                 end
                 painted_line = paint_line(line, color, start_col: start_col, end_col: end_col)
-                output << "#{Paint['>', color]} #{index + 1}: #{painted_line}"
+                output << "#{Paint[">", color]} #{index + 1}: #{painted_line}"
               else
                 output << "  #{index + 1}: #{line}"
               end
             end
           end
-          # ap file_lines
         end
 
         output
@@ -244,18 +241,18 @@ module Commands
       def process_validation(info)
         remedies = Set.new
 
-        if info['error_count'] > 0 || info['warning_count'] > 0
-          log "Encountered #{Paint[info['error_count'], :red]} Errors and #{Paint[info['warning_count'], :yellow]} Warnings!", depth: 2
-          info['diagnostics'].each do |dinfo|
-            color = dinfo['severity'] == 'error' ? :red : :yellow
-            log "#{Paint[dinfo['severity'].capitalize, color]}: #{dinfo['summary']}", depth: 3
-            if dinfo['detail'].include?('terraform init')
+        if info["error_count"] > 0 || info["warning_count"] > 0
+          log "Encountered #{Paint[info["error_count"], :red]} Errors and #{Paint[info["warning_count"], :yellow]} Warnings!", depth: 2
+          info["diagnostics"].each do |dinfo|
+            color = dinfo["severity"] == "error" ? :red : :yellow
+            log "#{Paint[dinfo["severity"].capitalize, color]}: #{dinfo["summary"]}", depth: 3
+            if dinfo["detail"].include?("terraform init")
               remedies << :init
             else
-              log dinfo['detail'], depth: 4
-              log format_validation_range(dinfo['range'], color), depth: 4
+              log dinfo["detail"], depth: 4
+              log format_validation_range(dinfo["range"], color), depth: 4
 
-              remedies << :unknown if dinfo['severity'] == 'error'
+              remedies << :unknown if dinfo["severity"] == "error"
             end
           end
         end
