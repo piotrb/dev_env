@@ -42,8 +42,8 @@ module Commands
         puts "=" * 20
         puts e.full_message
         puts
-        puts " .. waiting 5 seconds before exit .."
-        sleep 5
+        puts "< press enter to continue >"
+        gets
         exit 1
       end
 
@@ -246,11 +246,11 @@ module Commands
           info["diagnostics"].each do |dinfo|
             color = dinfo["severity"] == "error" ? :red : :yellow
             log "#{Paint[dinfo["severity"].capitalize, color]}: #{dinfo["summary"]}", depth: 3
-            if dinfo["detail"].include?("terraform init")
+            if dinfo["detail"]&.include?("terraform init")
               remedies << :init
             else
-              log dinfo["detail"], depth: 4
-              log format_validation_range(dinfo["range"], color), depth: 4
+              log dinfo["detail"], depth: 4 if dinfo["detail"]
+              log format_validation_range(dinfo["range"], color), depth: 4 if dinfo["range"]
 
               remedies << :unknown if dinfo["severity"] == "error"
             end
