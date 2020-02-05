@@ -14,6 +14,7 @@ import (
 var feature = flag.Bool("f", false, "Create as a Feature branch")
 var epic = flag.Bool("e", false, "Create as an Epic branch")
 var hotfix = flag.Bool("h", false, "Create as a Hotfix branch")
+var bug = flag.Bool("b", false, "Create as a Bug branch")
 var techdebt = flag.Bool("t", false, "Create as a Tech Debt branch")
 var sub = flag.Bool("s", false, "Create as a Sub branch")
 var subSeparator = flag.String("ss", "_", "string to separate sub tasks with")
@@ -64,6 +65,10 @@ func main() {
 
 	if *hotfix {
 		name = fmt.Sprintf("hotfix/%s", name)
+	}
+
+	if *bug {
+		name = fmt.Sprintf("bug/%s", name)
 	}
 
 	if *techdebt {
