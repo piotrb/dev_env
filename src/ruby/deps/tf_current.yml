@@ -1,0 +1,6 @@
+gems:
+  - cri
+  - paint
+  - pastel
+  - tty-reader
+  - awesome_print

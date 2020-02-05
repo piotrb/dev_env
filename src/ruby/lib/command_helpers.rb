@@ -41,6 +41,26 @@ module CommandHelpers
     end
   end
 
+  def log(message, depth: 0, newline: true)
+    message = Array(message)
+    message.each do |m|
+      indent = "  " * depth
+      print indent + m
+      print "\n" if newline
+    end
+  end
+
+  def run_with_each_line(cmd)
+    Open3.popen2e(cmd) { |_stdin, stdout_and_stderr, wait_thr|
+      pid = wait_thr.pid # pid of the started process.
+      until stdout_and_stderr.eof?
+        raw_line = stdout_and_stderr.gets
+        yield(raw_line)
+      end
+      wait_thr.value # Process::Status object returned.
+    }
+  end
+
   def run_shell(command, return_status: false, echo_command: true, quiet: false)
     puts "$> #{command}" if echo_command
     command += " 1>/dev/null 2>/dev/null" if quiet
@@ -68,9 +88,17 @@ module CommandHelpers
     begin
       gem name, version_requirements
     rescue Gem::MissingSpecError
-      puts "-> gem install #{name} #{version_requirements}"
-      Gem.install name, version_requirements
-      gem name, version_requirements
+      puts "Missing Gem: #{name} #{version_requirements}"
+      print "Would you like to install it? (only `yes' will be accepted) => "
+      input = gets.strip
+      if input == "yes"
+        puts "-> gem install #{name} #{version_requirements}"
+        Gem.install name, version_requirements
+        gem name, version_requirements
+      else
+        warn "Aborting!"
+        exit 1
+      end
     end
 
     Kernel.require require

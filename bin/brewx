@@ -3,4 +3,4 @@
 # this is an auto-generated stub for ruby executables
 
 require_relative '../src/ruby/init'
-execute_command(:tf_plan_summary, ARGV)
+execute_command(:brewx, ARGV)

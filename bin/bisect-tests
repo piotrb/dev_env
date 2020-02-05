@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# this is an auto-generated stub for ruby executables
+
 # How to use:
 # Make a file at the root of the project called: bisect.yml
 

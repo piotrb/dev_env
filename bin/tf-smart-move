@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
 
+# this is an auto-generated stub for ruby executables
+
 require_relative '../src/ruby/init'
 execute_command(:tf_smart_move, ARGV)
