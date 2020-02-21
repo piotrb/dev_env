@@ -32,7 +32,7 @@ module Commands
 
         return launch_cmd_loop(:error) unless prepare_folder
 
-        plan_status = create_plan(PLAN_FILENAME)
+        plan_status, @plan_meta = create_plan(PLAN_FILENAME)
 
         case plan_status
         when :ok
@@ -65,23 +65,23 @@ module Commands
 
       def create_plan(filename)
         log "Preparing Plan ...", depth: 1
-        exit_code = ::TfCurrent::PlanFormatter.pretty_plan(filename)
+        exit_code, meta = ::TfCurrent::PlanFormatter.pretty_plan(filename)
         case exit_code
         when 0
-          :ok
+          [:ok, meta]
         when 1
-          :error
+          [:error, meta]
         when 2
-          :changes
+          [:changes, meta]
         else
           log Paint["terraform plan exited with an unknown exit code: #{exit_code}", :yellow]
-          :unknown
+          [:unknown, meta]
         end
       end
 
       def plan_cmd
-        define_cmd("plan") do |opts, args, cmd|
-          plan_status = create_plan(PLAN_FILENAME)
+        define_cmd("plan", summary: "Re-run plan") do |opts, args, cmd|
+          plan_status, @plan_meta = create_plan(PLAN_FILENAME)
 
           case plan_status
           when :ok
@@ -97,8 +97,53 @@ module Commands
         end
       end
 
+      def force_unlock_cmd
+        define_cmd("force-unlock", summary: "Force unlock state after encountering a lock error!") do
+          prompt = TTY::Prompt.new(interrupt: :noop)
+
+          table = TTY::Table.new(header: ["Field", "Value"])
+          table << ["Lock ID", @plan_meta["ID"]]
+          table << ["Operation", @plan_meta["Operation"]]
+          table << ["Who", @plan_meta["Who"]]
+          table << ["Created", @plan_meta["Created"]]
+
+          puts table.render(:unicode, padding: [0, 1])
+
+          if @plan_meta && @plan_meta["error"] == "lock"
+            done = catch(:abort) {
+              if @plan_meta["Operation"] != "OperationTypePlan"
+                throw :abort unless prompt.yes?(
+                  "Are you sure you want to force unlock a lock for operation: #{@plan_meta["Operation"]}",
+                  default: false
+                )
+              end
+
+              throw :abort unless prompt.yes?(
+                "Are you sure you want to force unlock this lock?",
+                default: false
+              )
+
+              status = run_shell("terraform force-unlock -force #{@plan_meta["ID"].inspect}", return_status: true)
+              if status == 0
+                log "Done!"
+              else
+                log Paint["Failed with status: #{status}", :red]
+              end
+
+              true
+            }
+
+            unless done
+              log Paint["Aborted", :yellow]
+            end
+          else
+            log Paint["No lock error or no plan ran!", :red]
+          end
+        end
+      end
+
       def shell_cmd
-        define_cmd("shell") do |opts, args, cmd|
+        define_cmd("shell", summary: "Open your default terminal in the current folder") do |opts, args, cmd|
           log Paint["Launching shell ...", :yellow]
           log Paint["When it exits you will be back at this prompt.", :yellow]
           system ENV["SHELL"]
@@ -106,7 +151,7 @@ module Commands
       end
 
       def apply_cmd
-        define_cmd("apply") do |opts, args, cmd|
+        define_cmd("apply", summary: "Apply the current plan") do |opts, args, cmd|
           status = run_shell("terraform apply #{PLAN_FILENAME.inspect}", return_status: true)
           if status == 0
             throw :stop, :done
@@ -122,6 +167,7 @@ module Commands
         root_cmd.add_command(plan_cmd)
         root_cmd.add_command(apply_cmd)
         root_cmd.add_command(shell_cmd)
+        root_cmd.add_command(force_unlock_cmd)
 
         root_cmd.add_command(exit_cmd)
         # root_cmd.add_command(Cri::Command.define {

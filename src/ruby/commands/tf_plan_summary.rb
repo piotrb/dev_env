@@ -157,8 +157,10 @@ module Commands
       def find_config(module_root, module_name, address, parent_address)
         module_info = if parent_address.empty?
           module_root[module_name]
-        else
+        elsif module_root && module_root[module_name]
           module_root[module_name]["module"]
+        else
+          {}
         end
 
         if m = address.match(/^module\.([^.]+)\./)

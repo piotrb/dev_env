@@ -12,6 +12,8 @@ module TfCurrent
 
         phase = :init
 
+        meta = {}
+
         parser = StatefulParser.new(normalizer: pastel.method(:strip))
         parser.state(:info, /^Acquiring state lock/)
         parser.state(:error, /Error locking state/, %i[none blank info])
@@ -19,6 +21,9 @@ module TfCurrent
         parser.state(:refresh_done, /^----------+$/, [:refreshing])
         parser.state(:plan_info, /Terraform will perform the following actions:/, [:refresh_done])
         parser.state(:plan_summary, /^Plan:/, [:plan_info])
+
+        parser.state(:error_lock_info, /Lock Info/, [:error])
+        parser.state(:error, /^$/, [:error_lock_info])
 
         cmd = "terraform plan -out #{filename.inspect} -detailed-exitcode -compact-warnings -input=false"
         exit_status = run_with_each_line(cmd) { |raw_line|
@@ -38,6 +43,12 @@ module TfCurrent
                 p [state, line]
               end
             when :error
+              meta["error"] = "lock"
+              log Paint[line, :red], depth: 2
+            when :error_lock_info
+              if line =~ /^  ([^ ]+):\s+([^ ].+)$/
+                meta[$~[1]] = $~[2]
+              end
               log Paint[line, :red], depth: 2
             when :refreshing
               if phase != :refreshing
@@ -62,7 +73,7 @@ module TfCurrent
             end
           end
         }
-        exit_status.exitstatus
+        [exit_status.exitstatus, meta]
       end
 
       def process_validation(info)

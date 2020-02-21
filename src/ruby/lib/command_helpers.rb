@@ -61,8 +61,8 @@ module CommandHelpers
     }
   end
 
-  def run_shell(command, return_status: false, echo_command: true, quiet: false)
-    puts "$> #{command}" if echo_command
+  def run_shell(command, return_status: false, echo_command: true, quiet: false, indent: 0)
+    puts "#{" " * indent}$> #{command}" if echo_command
     command += " 1>/dev/null 2>/dev/null" if quiet
     system command.to_s
     code = $CHILD_STATUS.exitstatus
@@ -71,10 +71,13 @@ module CommandHelpers
     code
   end
 
-  def capture_shell(command, error: true, echo_command: true)
-    puts "<< #{command}" if echo_command
+  def capture_shell(command, error: true, echo_command: true, indent: 0, raise_on_error: false)
+    puts "#{" " * indent}<< #{command}" if echo_command
     command += " 2>/dev/null" unless error
-    `#{command}`
+    value = `#{command}`
+    code = $CHILD_STATUS.exitstatus
+    raise("capture_shell: #{command.inspect} failed with code: #{code}") if raise_on_error && code > 0
+    value
   end
 
   def fail(*messages, code: 1)
