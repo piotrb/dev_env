@@ -3,25 +3,58 @@
 require "English"
 require "yaml"
 
-require_relative "lib/method_import"
-require_relative "lib/command_helpers"
-
-import :need_gem, from: CommandHelpers
-
-need_gem "activesupport", require: "active_support/all"
+def env_undo
+  previous_env = ENV.to_hash
+  yield
+ensure
+  new_env = ENV.to_hash
+  new_keys = new_env.keys - previous_env.keys
+  new_keys.each do |key|
+    ENV.delete(key)
+  end
+  previous_env.each do |k, v|
+    ENV[k] = v
+  end
+end
 
 def load_deps(name)
-  fn = File.expand_path("deps/#{name}.yml", __dir__)
-  return unless File.exist?(fn)
-  dep_info = YAML.load_file(fn)
-
-  dep_info["gems"]&.each do |args|
-    need_gem(*args)
+  fn = File.expand_path("deps/#{name}.gemfile", __dir__)
+  if File.exist?(fn)
+    env_undo do
+      ENV["BUNDLE_GEMFILE"] = fn
+      # ENV['BUNDLE_PATH'] = File.expand_path("deps/bundle", __dir__)
+      ENV["GEM_HOME"] = File.expand_path("deps/bundle", __dir__)
+      require "bundler"
+      begin
+        Bundler.require(:default)
+        Bundler.reset_paths!
+        Bundler.clear_gemspec_cache
+      rescue Bundler::VersionConflict, Bundler::GemNotFound, LoadError => e
+        puts "#{e.class}: #{e.message}"
+        print "Would you like to run bundle install? (only `yes' will be accepted) => "
+        input = gets.strip
+        if input == "yes"
+          system "bundle install"
+          Bundler.reset_paths!
+          Bundler.clear_gemspec_cache
+          Bundler.require
+        else
+          warn "aborted"
+          exit 1
+        end
+      end
+    end
   end
 end
 
 def execute_command(name, args)
   load_deps(name)
+
+  require_relative "lib/command_helpers"
+
+  # just in case we don't have it in the gem
+  gem "activesupport"
+  require "active_support/all"
 
   require_relative "commands/#{name}"
   klass = "Commands::#{name.to_s.camelcase}".constantize

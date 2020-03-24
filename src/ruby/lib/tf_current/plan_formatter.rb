@@ -1,6 +1,9 @@
+require_relative "../../lib/method_import"
+
 module TfCurrent
   class PlanFormatter
     import :run_with_each_line,
+      :join_cmd,
       :log,
       from: CommandHelpers, to_class: true
 
@@ -25,7 +28,17 @@ module TfCurrent
         parser.state(:error_lock_info, /Lock Info/, [:error])
         parser.state(:error, /^$/, [:error_lock_info])
 
-        cmd = "terraform plan -out #{filename.inspect} -detailed-exitcode -compact-warnings -input=false"
+        parser.state(:plan_error, /^Error: /, [:refreshing])
+
+        cmd = [
+          "terraform",
+          "plan",
+          "-out", filename,
+          # "-no-color",
+          "-detailed-exitcode",
+          "-compact-warnings",
+          "-input=false",
+        ]
         exit_status = run_with_each_line(cmd) { |raw_line|
           plan_output << raw_line
           parser.parse(raw_line.rstrip) do |state, line|
@@ -44,6 +57,13 @@ module TfCurrent
               end
             when :error
               meta["error"] = "lock"
+              log Paint[line, :red], depth: 2
+            when :plan_error
+              if phase != :plan_error
+                puts
+                phase = :plan_error
+              end
+              meta["error"] = "refresh"
               log Paint[line, :red], depth: 2
             when :error_lock_info
               if line =~ /^  ([^ ]+):\s+([^ ].+)$/
@@ -73,6 +93,95 @@ module TfCurrent
             end
           end
         }
+        [exit_status.exitstatus, meta]
+      end
+
+      def process_upgrade
+        pastel = Pastel.new
+
+        plan_output = ""
+
+        phase = :init
+
+        meta = {}
+
+        parser = StatefulParser.new(normalizer: pastel.method(:strip))
+
+        parser.state(:modules, /^Upgrading modules\.\.\./)
+        parser.state(:backend, /^Initializing the backend\.\.\./, [:modules])
+        parser.state(:plugins, /^Initializing provider plugins\.\.\./, [:backend])
+
+        parser.state(:plugin_warnings, /^$/, [:plugins])
+
+        cmd = ["terraform", "init", "-upgrade", "-no-color", "-input=false"]
+        exit_status = run_with_each_line(cmd) { |raw_line|
+          plan_output << raw_line
+          parser.parse(raw_line.rstrip) do |state, line|
+            case state
+            when :modules
+              if phase != state
+                # first line
+                phase = state
+                log "Upgrding modules ", depth: 1, newline: false
+                next
+              end
+              case line
+              when /^- (?<module>[^ ]+) in (?<path>.+)$/
+                # info = $~.named_captures
+                # log "- #{info["module"]}", depth: 2
+                print "."
+              when /^Downloading (?<repo>[^ ]+) (?<version>[^ ]+) for (?<module>[^ ]+)\.\.\./
+                # info = $~.named_captures
+                # log "Downloading #{info["module"]} from #{info["repo"]} @ #{info["version"]}"
+                print "D"
+              when ""
+                puts
+              else
+                p [state, line]
+              end
+            when :backend
+              if phase != state
+                # first line
+                phase = state
+                log "Initializing the backend ", depth: 1, newline: false
+                next
+              end
+              case line
+              when ""
+                puts
+              else
+                p [state, line]
+              end
+            when :plugins
+              if phase != state
+                # first line
+                phase = state
+                log "Initializing provider plugins ...", depth: 1
+                next
+              end
+              case line
+              when /^- Downloading plugin for provider "(?<provider>[^\"]+)" \((?<provider_path>[^\)]+)\) (?<version>.+)\.\.\.$/
+                info = $~.named_captures
+                log "- #{info["provider"]} #{info["version"]}", depth: 2
+              when "- Checking for available provider plugins..."
+                # noop
+              else
+                p [state, line]
+              end
+            when :plugin_warnings
+              if phase != state
+                # first line
+                phase = state
+                next
+              end
+
+              log Paint[line, :yellow], depth: 1
+            else
+              p [state, line]
+            end
+          end
+        }
+
         [exit_status.exitstatus, meta]
       end
 

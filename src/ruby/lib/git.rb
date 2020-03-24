@@ -12,11 +12,11 @@ module Git
   end
 
   def get_config(name)
-    capture_shell("git config #{name.inspect}", echo_command: false, error: false).strip
+    capture_shell("git config #{shell_escape(name)}", echo_command: false, error: false).strip
   end
 
   def set_config(name, value)
-    run_shell("git config #{name.inspect} #{value.inspect}")
+    run_shell("git config #{shell_escape(name)} #{shell_escape(value)}")
   end
 
   def dirty?
@@ -24,23 +24,23 @@ module Git
   end
 
   def branch_exists?(name)
-    capture_shell("git rev-parse --verify #{name.inspect}", error: false, echo_command: false).strip != ""
+    capture_shell("git rev-parse --verify #{shell_escape(name)}", error: false, echo_command: false).strip != ""
   end
 
   def delete_branch(name, force: false)
     flag = force ? "-D" : "-d"
-    run_shell("git branch #{flag} #{name.inspect}")
+    run_shell("git branch #{flag} #{shell_escape(name)}")
   end
 
   def fetch(remote, quiet: false)
-    run_shell("git fetch #{remote.inspect}", quiet: quiet)
+    run_shell("git fetch #{shell_escape(remote)}", quiet: quiet)
   end
 
   def fetch_multiple(remotes, quiet: false, echo: true)
     cmd = [
       "git fetch",
       "--multiple",
-      remotes.map(&:inspect).join(" "),
+      remotes.map { |r| shell_escape(r) }.join(" "),
       "--no-prune-tags",
       quiet ? "--quiet" : nil,
     ].compact.join(" ")
@@ -48,14 +48,14 @@ module Git
   end
 
   def rev_parse(ref)
-    capture_shell("git rev-parse #{ref.inspect}", raise_on_error: true, echo_command: false).strip
+    capture_shell("git rev-parse #{shell_escape(ref)}", raise_on_error: true, echo_command: false).strip
   end
 
   def checkout(ref = nil, to_branch: nil, quiet: false)
     cmd = [
       "git checkout",
       quiet ? "-q" : nil,
-      ref ? ref.inspect : nil,
+      ref ? shell_escape(ref) : nil,
       to_branch ? "-b #{to_branch}" : nil,
     ]
     run_shell cmd.compact.join(" ")
@@ -64,7 +64,7 @@ module Git
   def commit(message:, echo: true)
     cmd = [
       "git commit",
-      "-m #{message.inspect}",
+      "-m #{shell_escape(message)}",
     ].join(" ")
     run_shell cmd, echo_command: echo
   end
@@ -73,8 +73,8 @@ module Git
     cmd = [
       "git rebase",
       interactive ? "-i" : nil,
-      upstream ? upstream.inspect : nil,
-      branch ? branch.inspect : nil,
+      upstream ? shell_escape(upstream) : nil,
+      branch ? shell_escape(branch) : nil,
     ]
     run_shell cmd.compact.join(" "), return_status: return_status
   end
@@ -84,7 +84,7 @@ module Git
       "git merge",
       ff.nil? ? nil : (ff ? "--ff" : "--no-ff"), # rubocop:disable Style/NestedTernaryOperator
       edit.nil? ? nil : (edit ? "--edit" : "--no-edit"), # rubocop:disable Style/NestedTernaryOperator
-      ref.inspect,
+      shell_escape(ref),
     ]
     run_shell cmd.compact.join(" "), quiet: true
   end
@@ -93,26 +93,26 @@ module Git
     cmd = [
       "git reset",
       hard ? "--hard" : nil,
-      ref.inspect,
+      shell_escape(ref),
     ]
     run_shell cmd.compact.join(" ")
   end
 
   def add(path, echo: true)
-    run_shell "git add #{path.inspect}", echo_command: echo
+    run_shell "git add #{shell_escape(path)}", echo_command: echo
   end
 
   def tag(name, annotate: nil, echo: true)
     cmd = [
       "git tag",
-      name.inspect,
-      annotate ? "-a -m #{annotate.inspect}" : nil,
+      shell_escape(name),
+      annotate ? "-a -m #{shell_escape(annotate)}" : nil,
     ].compact.join(" ")
     run_shell cmd, echo_command: echo
   end
 
   def delete_tag(name)
-    run_shell "git tag -d #{name.inspect}"
+    run_shell "git tag -d #{shell_escape(name)}"
   end
 
   def push(src: nil, remote: nil, dst: nil, force: false, quiet: false)
@@ -120,7 +120,7 @@ module Git
 
     cmd = [
       "git push",
-      remote ? remote.inspect : nil,
+      remote ? shell_escape(remote) : nil,
       ref,
       "--follow-tags",
       force ? "--force" : nil,
@@ -234,6 +234,10 @@ module Git
     end
 
     result
+  end
+
+  def shell_escape(str)
+    Shellwords.escape(str)
   end
 
   extend self

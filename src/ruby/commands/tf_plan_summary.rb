@@ -9,7 +9,6 @@ module Commands
         require "optparse"
         require "json"
         require_relative "../lib/ansi.rb"
-        need_gem "tty-prompt"
       end
 
       def run(args)
@@ -111,8 +110,12 @@ module Commands
         }
 
         if !result.empty?
-          puts "Re-running apply with the selected resources ..."
-          system "terraform apply #{result.map { |a| "-target=#{a.inspect}" }.join(" ")}"
+          log "Re-running apply with the selected resources ..."
+          status = run_shell(["terraform", "apply", *result.map { |a| "-target=#{a}" }], return_status: true)
+          if status != 0
+            log Paint["Failed! (#{status})", :red]
+            exit status
+          end
         else
           raise "nothing selected"
         end

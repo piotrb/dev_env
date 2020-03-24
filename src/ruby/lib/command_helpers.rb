@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'shellwords'
+
 module CommandHelpers
   def valid_commands
     methods.grep(/^cmd_/).map { |method| method.to_s.gsub(/^cmd_/, "") }
@@ -50,8 +52,17 @@ module CommandHelpers
     end
   end
 
-  def run_with_each_line(cmd)
-    Open3.popen2e(cmd) { |_stdin, stdout_and_stderr, wait_thr|
+  def join_cmd(args)
+    if args.is_a? Array
+      Shellwords.join(args)
+    else
+      args
+    end
+  end
+
+  def run_with_each_line(command)
+    command = join_cmd(command)
+    Open3.popen2e(command) { |_stdin, stdout_and_stderr, wait_thr|
       pid = wait_thr.pid # pid of the started process.
       until stdout_and_stderr.eof?
         raw_line = stdout_and_stderr.gets
@@ -62,6 +73,7 @@ module CommandHelpers
   end
 
   def run_shell(command, return_status: false, echo_command: true, quiet: false, indent: 0)
+    command = join_cmd(command)
     puts "#{" " * indent}$> #{command}" if echo_command
     command += " 1>/dev/null 2>/dev/null" if quiet
     system command.to_s
@@ -72,6 +84,7 @@ module CommandHelpers
   end
 
   def capture_shell(command, error: true, echo_command: true, indent: 0, raise_on_error: false)
+    command = join_cmd(command)
     puts "#{" " * indent}<< #{command}" if echo_command
     command += " 2>/dev/null" unless error
     value = `#{command}`
@@ -85,26 +98,6 @@ module CommandHelpers
       warn(message)
     end
     exit code
-  end
-
-  def need_gem(name, version_requirements = nil, require: name)
-    begin
-      gem name, version_requirements
-    rescue Gem::MissingSpecError
-      puts "Missing Gem: #{name} #{version_requirements}"
-      print "Would you like to install it? (only `yes' will be accepted) => "
-      input = gets.strip
-      if input == "yes"
-        puts "-> gem install #{name} #{version_requirements}"
-        Gem.install name, version_requirements
-        gem name, version_requirements
-      else
-        warn "Aborting!"
-        exit 1
-      end
-    end
-
-    Kernel.require require
   end
 
   # option_definitions

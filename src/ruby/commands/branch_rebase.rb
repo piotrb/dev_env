@@ -6,7 +6,6 @@ module Commands
       def init
         require "optparse"
         require_relative "../lib/git"
-        need_gem "awesome_print"
       end
 
       def run(args)

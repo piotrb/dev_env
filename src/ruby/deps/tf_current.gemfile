@@ -1,0 +1,12 @@
+source "https://rubygems.org"
+
+gem "activesupport", require: 'active_support/all'
+
+gem "tty-table"
+gem "tty-reader"
+gem "tty-screen"
+gem "cri"
+gem "paint"
+gem "pastel"
+gem "awesome_print"
+gem "tty-prompt"

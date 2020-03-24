@@ -5,10 +5,6 @@ module Commands
     class << self
       def init
         require "yaml"
-        need_gem "awesome_print"
-        need_gem "tty-table"
-        need_gem "paint"
-        need_gem "hashie"
       end
 
       def run(argv)

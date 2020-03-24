@@ -32,6 +32,11 @@ module Commands
 
         return launch_cmd_loop(:error) unless prepare_folder
 
+        if ENV["TF_UPGRADE"]
+          upgrade_status, upgrade_meta = run_upgrade
+          return launch_cmd_loop(:error) unless upgrade_status == :ok
+        end
+
         plan_status, @plan_meta = create_plan(PLAN_FILENAME)
 
         case plan_status
@@ -58,7 +63,7 @@ module Commands
       end
 
       def pretty_plan_summary(filename)
-        run_with_each_line("tf-plan-summary #{filename.inspect}") do |raw_line|
+        run_with_each_line(["tf-plan-summary", filename]) do |raw_line|
           log raw_line.rstrip, depth: 2
         end
       end
@@ -79,21 +84,25 @@ module Commands
         end
       end
 
+      def run_plan
+        plan_status, @plan_meta = create_plan(PLAN_FILENAME)
+
+        case plan_status
+        when :ok
+          log "no changes", depth: 1
+        when :error
+          log "something went wrong", depth: 1
+        when :changes
+          log "Printing Plan Summary ...", depth: 1
+          pretty_plan_summary(PLAN_FILENAME)
+        when :unknown
+          # nothing
+        end
+      end
+
       def plan_cmd
         define_cmd("plan", summary: "Re-run plan") do |opts, args, cmd|
-          plan_status, @plan_meta = create_plan(PLAN_FILENAME)
-
-          case plan_status
-          when :ok
-            log "no changes", depth: 1
-          when :error
-            log "something went wrong", depth: 1
-          when :changes
-            log "Printing Plan Summary ...", depth: 1
-            pretty_plan_summary(PLAN_FILENAME)
-          when :unknown
-            # nothing
-          end
+          run_plan
         end
       end
 
@@ -123,7 +132,7 @@ module Commands
                 default: false
               )
 
-              status = run_shell("terraform force-unlock -force #{@plan_meta["ID"].inspect}", return_status: true)
+              status = run_shell(["terraform", "force-unlock", "-force", @plan_meta["ID"]], return_status: true)
               if status == 0
                 log "Done!"
               else
@@ -152,11 +161,32 @@ module Commands
 
       def apply_cmd
         define_cmd("apply", summary: "Apply the current plan") do |opts, args, cmd|
-          status = run_shell("terraform apply #{PLAN_FILENAME.inspect}", return_status: true)
+          status = run_shell(["terraform", "apply", PLAN_FILENAME], return_status: true)
           if status == 0
             throw :stop, :done
           else
             log "Apply Failed!"
+          end
+        end
+      end
+
+      def upgrade_cmd
+        define_cmd("upgrade", summary: "Upgrade modules/plguins") do |opts, args, cmd|
+          status, meta = run_upgrade
+          if status != :ok
+            log meta.inspect if meta.length > 0
+            log "Upgrade Failed!"
+          end
+        end
+      end
+
+      def interactive_cmd
+        define_cmd("interactive", summary: "Apply interactively") do |opts, args, cmd|
+          status = run_shell(["tf-plan-summary", PLAN_FILENAME, "-i"], return_status: true)
+          if status != 0
+            log "Interactive Apply Failed!"
+          else
+            run_plan
           end
         end
       end
@@ -168,6 +198,8 @@ module Commands
         root_cmd.add_command(apply_cmd)
         root_cmd.add_command(shell_cmd)
         root_cmd.add_command(force_unlock_cmd)
+        root_cmd.add_command(upgrade_cmd)
+        root_cmd.add_command(interactive_cmd)
 
         root_cmd.add_command(exit_cmd)
         # root_cmd.add_command(Cri::Command.define {
@@ -218,6 +250,7 @@ module Commands
       end
 
       def launch_cmd_loop(status)
+        return if ENV["NO_CMD"]
         case status
         when :error, :unknown
           log Paint["Dropping to command line so you can fix the issue!", :red]
@@ -230,6 +263,21 @@ module Commands
       def prepare_folder
         remedies = ::TfCurrent::PlanFormatter.process_validation(validate)
         process_remedies(remedies)
+      end
+
+      def run_upgrade
+        exit_code, meta = ::TfCurrent::PlanFormatter.process_upgrade
+        case exit_code
+        when 0
+          [:ok, meta]
+        when 1
+          [:error, meta]
+        # when 2
+        #   [:changes, meta]
+        else
+          log Paint["terraform init upgrade exited with an unknown exit code: #{exit_code}", :yellow]
+          [:unknown, meta]
+        end
       end
 
       def validate

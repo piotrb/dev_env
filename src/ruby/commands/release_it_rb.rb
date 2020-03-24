@@ -18,10 +18,10 @@ module Commands
         }
 
         static_steps = [
-          {"type" => "show_version", :quiet => true},
+          {"type" => "show_version", "options" => {"quiet" => true}},
         ]
         static_pre_steps = [
-          {"type" => "git:no_dirty", :quiet => true},
+          {"type" => "git:no_dirty", "options" => {"quiet" => true}},
         ]
 
         last = build_step_stack(config["steps"], last)
@@ -54,17 +54,23 @@ module Commands
       end
 
       def run_step(step, &block)
-        log Paint[(step["type"]).to_s, :green], bullet: :yellow unless step[:quiet]
+        options = step["options"] || {}
+        log Paint[(step["type"]).to_s, :green], bullet: :yellow unless options["quiet"]
         runner = "run_#{step["type"].gsub(/[:]/, "_")}_step"
         if respond_to?(runner, true)
-          send(runner, step, &block)
+          send(runner, options, &block)
         else
           raise "don't know how to handle step: #{step.inspect} - define #{runner} ?"
         end
       end
 
       def log(msg, level: 0, bullet: :default)
-        puts "#{" " * (level * 2)}#{bullet ? Paint["• ", bullet] : ""}#{msg}"
+        msg = TTY::Markdown.parse(msg)
+        prefix = ""
+        prefix += " " * (level * 2)
+        prefix += Paint["• ", bullet] if bullet
+        msg = msg.split("\n").map { |line| "#{prefix}#{line}" }.join("\n")
+        puts msg.lstrip
       end
 
       def prompt
@@ -110,11 +116,13 @@ module Commands
           begin
             log Paint["getting changelog ...", :cyan], level: 1, bullet: false
             @last_changelog = capture_shell("conventional-changelog --pkg release.json", indent: 4, echo_command: false, raise_on_error: true).strip
+            @last_changelog.gsub!(/<small>(.+)<\/small>/, '\1')
+            log @last_changelog, level: 2, bullet: false
             if step["update"]
-              # if prompt.yes?("update #{step["update"]}?")
-              last_changelog_body = File.read(step["update"])
-              run_shell("conventional-changelog --pkg release.json -s -i #{step["update"].inspect}", indent: 4)
-              # end
+              if prompt.yes?("update #{step["update"]}?")
+                last_changelog_body = File.read(step["update"])
+                run_shell("conventional-changelog --pkg release.json -s -i #{step["update"].inspect}", indent: 4)
+              end
             end
           ensure
             File.unlink("release.json") if File.exist?("release.json")
@@ -181,6 +189,8 @@ module Commands
             end
             if step["no_confirm"] || prompt.yes?("Commit?")
               message = step["message"].gsub("{{version}}", version)
+              message_suffix = prompt.ask("What do want want to name this release? (#{message} - ?) [leave blank to ommit]", default: nil) if step["ask_message"]
+              message += " - #{message_suffix}" if message_suffix
               Git.commit(message: message, echo: false)
               log "committed #{message}", level: 1
             end
@@ -224,25 +234,36 @@ module Commands
       def run_git_push_step(step)
         raise "step must specify remotes!" unless step["remotes"]
 
+        step["remotes"].each_with_index do |remote, index|
+          if remote.is_a?(String)
+            step["remotes"][index] = {
+              "remote" => remote,
+            }
+          end
+        end
+
+        remote_names = step["remotes"].map { |ri| ri["remote"] }
+
         branch = Git.current_branch
 
         previous_refs = {}
         done_remotes = {}
 
-        step["remotes"].each do |remote|
+        remote_names.each do |remote|
           previous_refs[remote] = Git.rev_parse("#{remote}/#{branch}")
         end
 
         remotes = prompt.multi_select(
           "push to branches:",
-          step["remotes"],
-          default: (1..step["remotes"].length).to_a,
+          remote_names,
+          default: (1..remote_names.length).to_a,
           help: ""
         )
 
-        remotes.each do |remote|
-          done_remotes[remote] = true
-          Git.push(remote: remote, dst: branch, quiet: true)
+        remotes.each do |remote_name|
+          remote_info = step["remotes"].find { |r| r["remote"] == remote_name }
+          done_remotes[remote_name] = true
+          Git.push(remote: remote_name, dst: branch, quiet: true, force: remote_info["force"])
         end
 
         yield
@@ -250,6 +271,7 @@ module Commands
         previous_refs.each do |remote, ref|
           if done_remotes[remote]
             Git.push(src: ref, remote: remote, dst: branch, force: true, quiet: true)
+            Git.push(src: "", remote: remote, dst: @next_version)
           end
         end
         raise e
