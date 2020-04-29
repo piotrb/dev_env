@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'shellwords'
+require "shellwords"
 
 module CommandHelpers
   def valid_commands
@@ -83,14 +83,21 @@ module CommandHelpers
     code
   end
 
-  def capture_shell(command, error: true, echo_command: true, indent: 0, raise_on_error: false)
+  def capture_shell(command, error: true, echo_command: true, indent: 0, raise_on_error: false, detailed_result: false)
     command = join_cmd(command)
     puts "#{" " * indent}<< #{command}" if echo_command
     command += " 2>/dev/null" unless error
     value = `#{command}`
     code = $CHILD_STATUS.exitstatus
     raise("capture_shell: #{command.inspect} failed with code: #{code}") if raise_on_error && code > 0
-    value
+    if detailed_result
+      OpenStruct.new({
+        status: code,
+        output: value,
+      })
+    else
+      value
+    end
   end
 
   def fail(*messages, code: 1)

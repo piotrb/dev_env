@@ -1,13 +1,9 @@
-require_relative "../../lib/method_import"
-
 module TfCurrent
   class PlanFormatter
-    import :run_with_each_line,
-      :join_cmd,
-      :log,
-      from: CommandHelpers, to_class: true
-
     class << self
+      include CommandHelpers
+      include TerraformHelpers
+
       def pretty_plan(filename)
         pastel = Pastel.new
 
@@ -30,16 +26,7 @@ module TfCurrent
 
         parser.state(:plan_error, /^Error: /, [:refreshing])
 
-        cmd = [
-          "terraform",
-          "plan",
-          "-out", filename,
-          # "-no-color",
-          "-detailed-exitcode",
-          "-compact-warnings",
-          "-input=false",
-        ]
-        exit_status = run_with_each_line(cmd) { |raw_line|
+        status = tf_plan(out: filename, detailed_exitcode: true, compact_warnings: true) { |raw_line|
           plan_output << raw_line
           parser.parse(raw_line.rstrip) do |state, line|
             case state
@@ -93,7 +80,7 @@ module TfCurrent
             end
           end
         }
-        [exit_status.exitstatus, meta]
+        [status.status, meta]
       end
 
       def process_upgrade
@@ -113,8 +100,7 @@ module TfCurrent
 
         parser.state(:plugin_warnings, /^$/, [:plugins])
 
-        cmd = ["terraform", "init", "-upgrade", "-no-color", "-input=false"]
-        exit_status = run_with_each_line(cmd) { |raw_line|
+        status = tf_init(upgrade: true, color: false) { |raw_line|
           plan_output << raw_line
           parser.parse(raw_line.rstrip) do |state, line|
             case state
@@ -182,7 +168,7 @@ module TfCurrent
           end
         }
 
-        [exit_status.exitstatus, meta]
+        [status.status, meta]
       end
 
       def process_validation(info)

@@ -11,12 +11,14 @@ module Commands
         require "open3"
         require "shellwords"
         require_relative "../lib/stateful_parser"
+        require_relative "../lib/terraform_helpers"
         require_relative "../lib/tf_current/plan_formatter"
         require_relative "../lib/cmd_loop"
         require_relative "../lib/cri_command_support"
 
         extend CmdLoop
         extend CriCommandSupport
+        extend TerraformHelpers
       end
 
       def run(args)
@@ -29,6 +31,7 @@ module Commands
         log "Processing #{Paint[folder_name, :cyan]} ..."
 
         ENV["TF_IN_AUTOMATION"] = "1"
+        ENV["TF_INPUT"] = "0"
 
         return launch_cmd_loop(:error) unless prepare_folder
 
@@ -132,8 +135,8 @@ module Commands
                 default: false
               )
 
-              status = run_shell(["terraform", "force-unlock", "-force", @plan_meta["ID"]], return_status: true)
-              if status == 0
+              status = tf_force_unlock(id: @plan_meta["ID"])
+              if status.success?
                 log "Done!"
               else
                 log Paint["Failed with status: #{status}", :red]
@@ -161,8 +164,8 @@ module Commands
 
       def apply_cmd
         define_cmd("apply", summary: "Apply the current plan") do |opts, args, cmd|
-          status = run_shell(["terraform", "apply", PLAN_FILENAME], return_status: true)
-          if status == 0
+          status = tf_apply(filename: PLAN_FILENAME)
+          if status.success?
             throw :stop, :done
           else
             log "Apply Failed!"
@@ -282,13 +285,13 @@ module Commands
 
       def validate
         log "Validating module ...", depth: 1
-        JSON.parse(`terraform validate -json`)
+        tf_validate.parsed_output
       end
 
       def process_remedies(remedies)
         if remedies.delete? :init
           log "Running terraform init ...", depth: 2
-          system("terraform init -input=false")
+          tf_init
           remedies = ::TfCurrent::PlanFormatter.process_validation(validate)
           process_remedies(remedies)
         end

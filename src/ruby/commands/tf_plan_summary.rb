@@ -9,6 +9,9 @@ module Commands
         require "optparse"
         require "json"
         require_relative "../lib/ansi.rb"
+        require_relative "../lib/terraform_helpers"
+
+        extend TerraformHelpers
       end
 
       def run(args)
@@ -31,7 +34,7 @@ module Commands
         end
 
         data = if args[0]
-          JSON.parse(`terraform show -json #{args[0].inspect}`)
+          load_summary_from_file(args[0])
         else
           JSON.parse(STDIN.read)
         end
@@ -91,7 +94,35 @@ module Commands
           else
             print_flat(parts)
           end
+          print_summary(parts)
         end
+      end
+
+      def load_summary_from_file(file)
+        if File.exist?("#{file}.json") && File.mtime("#{file}.json").to_f >= File.mtime(file).to_f
+          JSON.parse(File.read("#{file}.json"))
+        else
+          puts "Analyzing changes ..."
+          result = tf_show(file, json: true)
+          data = result.parsed_output
+          File.open("#{file}.json", "w") { |fh| fh.write(JSON.dump(data)) }
+          data
+        end
+      end
+
+      def print_summary(parts)
+        summary = {}
+        parts.each do |part|
+          summary[part[:action]] ||= 0
+          summary[part[:action]] += 1
+        end
+        pieces = summary.map { |k, v|
+          color = color_for_action(k)
+          "#{Paint[v, :yellow]} to #{Paint[k, color]}"
+        }
+
+        puts
+        puts "Plan Summary: #{pieces.join(Paint[", ", :gray])}"
       end
 
       def print_flat(parts)
@@ -111,10 +142,10 @@ module Commands
 
         if !result.empty?
           log "Re-running apply with the selected resources ..."
-          status = run_shell(["terraform", "apply", *result.map { |a| "-target=#{a}" }], return_status: true)
-          if status != 0
-            log Paint["Failed! (#{status})", :red]
-            exit status
+          status = tf_apply(targets: result)
+          unless status.success?
+            log Paint["Failed! (#{status.status})", :red]
+            exit status.status
           end
         else
           raise "nothing selected"
@@ -212,21 +243,44 @@ module Commands
         result
       end
 
-      def format_action(action)
+      def color_for_action(action)
         case action
         when "create"
-          "#{ansi(:green)}+#{ansi(:reset)}"
+          :green
         when "update"
-          "#{ansi(:yellow)}~#{ansi(:reset)}"
+          :yellow
         when "delete"
-          "#{ansi(:red)}-#{ansi(:reset)}"
+          :red
         when "replace"
-          "#{ansi(:red)}±#{ansi(:reset)}"
+          :red
         when "read"
-          "#{ansi(:cyan)}>#{ansi(:reset)}"
+          :cyan
+        else
+          :reset
+        end
+      end
+
+      def symbol_for_action(action)
+        case action
+        when "create"
+          "+"
+        when "update"
+          "~"
+        when "delete"
+          "-"
+        when "replace"
+          "±"
+        when "read"
+          ">"
         else
           action
         end
+      end
+
+      def format_action(action)
+        color = color_for_action(action)
+        symbol = symbol_for_action(action)
+        Paint[symbol, color]
       end
 
       def format_address(address)
