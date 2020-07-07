@@ -8,3 +8,5 @@ set mouse-scroll = 3
 set mouse-wheel-cursor = yes
 bind status <Ctrl-r> !sh -c "echo %(file) >> .gitignore && vi .gitignore"
 set editor-line-number = no
+set log-options = --show-signature
+set diff-options = --show-signature

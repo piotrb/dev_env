@@ -103,6 +103,8 @@ module Commands
           pkg.summary = spec.summary
           pkg.changelog_uri = spec.metadata["changelog_uri"]
           pkg.source_code_uri = spec.metadata["source_code_uri"]
+        rescue Gem::MissingSpecError => e
+          p "skipping #{pkg.name} - #{e.class}: #{e.message}"
         end
       end
 
